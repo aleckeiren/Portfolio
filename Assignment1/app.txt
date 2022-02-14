@@ -1,0 +1,4 @@
+The application provides users who wants to go to either a beach or campground in Hamilton a list of available destinations, and the user will be able to filter between the two types.
+It allows users to enter a start location or get the coordinates via Geolocation.
+I implemented Reverse Geolocation to get the Address from the coordinates which would then be used for the navigation.
+The user will be able to select a destination Address by clicking an item in the locations list.

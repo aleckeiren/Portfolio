@@ -1,0 +1,41 @@
+<?php
+// "StAuth10065: I Alec Pasion, 000811377 certify that this material is my original work. 
+// No other person's work has been used without due acknowledgement. 
+// I have not made my work available to anyone else."
+
+// turn off notices, warnings, deprecated errors
+error_reporting(E_ALL ^ (E_NOTICE | E_WARNING | E_DEPRECATED));  
+error_reporting(E_ALL ^ E_NOTICE);
+$DB['server'] = 'localhost';
+$DB['user'] = 'sa000811377';
+$DB['password'] = 'Sa_19990922';
+$DB['db'] = 'sa000811377';
+
+try 
+{
+	$conn = new PDO("mysql:host=".$DB['server'].";dbname=".$DB['db'],
+	                $DB['user'],
+					$DB['password']);
+					
+	$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	$conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+	
+}
+catch (PDOException $e)
+{
+	$error = array(
+		'time'=> date("F j, Y, g:i a"),
+		'sql'=> "mysql:host=".$DB['server'].";dbname=".$DB['db'].$DB['user'].$DB['password'],
+		'mysqlerror'=> $e->getMessage(),
+		'filename'=> __FILE__,
+		'linenumber'=> __LINE__,
+		'remotehost'=> gethostbyaddr($_SERVER['REMOTE_ADDR']),
+		'clientip'=> $_SERVER['REMOTE_ADDR']
+	  );
+	  $fp = fopen('errorlog.txt', 'a');
+	  fwrite($fp, print_r($error, true));
+	  fclose($fp);
+	  include 'app.errorview.php';
+		exit();
+	exit();
+}

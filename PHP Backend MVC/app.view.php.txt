@@ -1,0 +1,225 @@
+<!-- 
+"StAuth10065: I Alec Pasion, 000811377 certify that this material is my original work. 
+No other person's work has been used without due acknowledgement. 
+I have not made my work available to anyone else." 
+-->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Phone Book</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+  <style>
+    #phoneForm{
+      margin:auto;
+      width: 80%;
+      padding: 1em;
+    }
+    i{
+      margin-left: 2px;
+    }
+    .container {
+      margin-top: 1em;
+    }
+    .my-custom-scrollbar {
+      position: relative;
+      height: 400px;
+      overflow: auto;
+    }
+    .table-wrapper-scroll-y {
+      display: block;
+    }
+    .tabcontainer{
+      padding: 1em 0 0 0;
+    }
+    .bi-arrow-down-short, .bi-arrow-up-short {
+      color: #1f5959;
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-light bg-light shadow-sm p-1 mb-1 rounded justify-content-center" >
+  <a href="app.ctrl.php" class="navbar-brand">Phone Book</a>
+</nav>
+<div class="container shadow p-3 mb-5 bg-white rounded">
+<?php if(empty($inputVal)) {?>
+<form id="phoneForm" method="post" action="app.ctrl.php?act=create">
+<?php }
+  else{
+?>
+<form id="phoneForm" method="post" action="app.ctrl.php?act=update&id=<?php echo $inputVal['id'] ?>">
+  <div class="form-row">
+    <div class="form-group col-md-1">
+      <label for="id">ID</label>
+      <input class="form-control" type="text" name="id" id="id" value="<?php echo $inputVal['id'] ?>" disabled/>
+    </div>
+  </div>
+<?php } ?>
+
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label for="lname">Last Name</label>
+      <input class="form-control" type="text" name="lname" id="lname" placeholder="Enter last name" value="<?php echo $inputVal['lname'] ?>"required/>
+    </div>
+    <div class="form-group col-md-6">
+    <label for="fname">First Name</label>
+      <input class="form-control" type="text" name="fname" id="fname" placeholder="Enter first name" value="<?php echo $inputVal['fname'] ?>"required/>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label for="phone">Phone Number</label>
+      <input class="form-control" type="tel" id="phone" name="phone" placeholder="123-4567" pattern="[0-9]{3}-[0-9]{4}" value="<?php echo $inputVal['phone'] ?>" required>
+    </div>
+    <div class="form-group col-md-6">
+      <label for="email">Email</label>
+      <input class="form-control" type="email" id="email" name="email" placeholder="Enter Email" value="<?php echo $inputVal['email'] ?>" required>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group col-md-3">
+      <label for="location">Location</label>
+      <input class="form-control" type="location" id="location" name="location" placeholder="Enter Location" value="<?php echo $inputVal['location'] ?>" required>
+    </div>
+    <div class="form-group col-md-3">
+      <label for="mc">MC</label>
+      <input class="form-control" type="tel" id="mc" name="mc" placeholder="1234"  pattern="[0-9]{4}" value="<?php echo $inputVal['mc'] ?>" required>
+    </div>
+    <div class="form-group col-md-3">
+      <label for="pos">Pos</label>
+      <input class="form-control" type="text" id="pos" name="pos" placeholder="ABC" value="<?php echo $inputVal['pos'] ?>" required>
+    </div>
+    <div class="form-group col-md-3">
+      <label for="dept">Dept</label>
+      <input class="form-control" type="text" id="dept" name="dept" placeholder="DEPT" value="<?php echo $inputVal['dept'] ?>" required>
+    </div>
+  </div>
+  <input class="btn btn-primary" type="submit" value="<?php echo $buttonText ?>">
+</form>
+</div>
+<div class="container tabcontainer">
+  <?php if($showDelete){ ?>
+    <p>Click <a href="app.ctrl.php?act=deleteyes&id=<?php echo $_REQUEST['id']?>">here</a> if you really
+    want to delete <?php echo $userDelName['lname'].' '. $userDelName['fname'] ?>
+    </p>
+  <?php } ?>
+  <div class="table-wrapper-scroll-y my-custom-scrollbar">
+    <table class="table">
+    <tr style="position: sticky;top: 0;z-index: 999;background: #ddd;">
+        <th style="width: 2.3em;"></th>
+        <th scope="col">
+          <div style="min-width: 3em;text-align:center">
+            ID
+          </div>
+          <div style="text-align:center">
+            <a href="app.ctrl.php?act=sort&col=id&direc=DESC"><i class="bi bi-arrow-down-short"></i></a>
+            <a href="app.ctrl.php?act=sort&col=id&direc=ASC"><i class="bi bi-arrow-up-short"></i></a>
+          </div>
+        </th>
+        <th scope="col">
+          <div>
+            Last Name
+          </div>
+          <div>
+            <a href="app.ctrl.php?act=sort&col=lname&direc=DESC"><i class="bi bi-arrow-down-short"></i></a>
+            <a href="app.ctrl.php?act=sort&col=lname&direc=ASC"><i class="bi bi-arrow-up-short"></i></a>
+          </div>
+        </th>	
+        <th scope="col">
+          <div>
+            First Name
+          </div>
+          <div>        
+            <a href="app.ctrl.php?act=sort&col=fname&direc=DESC"><i class="bi bi-arrow-down-short"></i></a>
+            <a href="app.ctrl.php?act=sort&col=fname&direc=ASC"><i class="bi bi-arrow-up-short"></i></a>
+          </div>
+        </th>	
+        <th scope="col">
+          <div>
+            Phone
+          </div>
+          <div>
+            <a href="app.ctrl.php?act=sort&col=phone&direc=DESC"><i class="bi bi-arrow-down-short"></i></a>
+            <a href="app.ctrl.php?act=sort&col=phone&direc=ASC"><i class="bi bi-arrow-up-short"></i></a>
+          </div>
+        </th>
+        <th scope="col">
+          <div>
+            Email
+          </div>
+          <div>
+            <a href="app.ctrl.php?act=sort&col=email&direc=DESC"><i class="bi bi-arrow-down-short"></i></a>
+            <a href="app.ctrl.php?act=sort&col=email&direc=ASC"><i class="bi bi-arrow-up-short"></i></a>
+          </div>
+        </th>
+        <th scope="col">
+          <div>        
+            Location
+          </div>
+          <div>
+            <a href="app.ctrl.php?act=sort&col=location&direc=DESC"><i class="bi bi-arrow-down-short"></i></a>
+            <a href="app.ctrl.php?act=sort&col=location&direc=ASC"><i class="bi bi-arrow-up-short"></i></a>
+          </div>
+        </th>
+        <th scope="col">
+          <div style="min-width: 3em;">
+            MC
+          </div>
+          <div>
+            <a href="app.ctrl.php?act=sort&col=mc&direc=DESC"><i class="bi bi-arrow-down-short"></i></a>
+            <a href="app.ctrl.php?act=sort&col=mc&direc=ASC"><i class="bi bi-arrow-up-short"></i></a>
+          </div>
+        </th>
+        <th scope="col">
+          <div style="min-width: 3em;">
+            Pos
+          </div>
+          <div>
+            <a href="app.ctrl.php?act=sort&col=pos&direc=DESC"><i class="bi bi-arrow-down-short"></i></a>
+            <a href="app.ctrl.php?act=sort&col=pos&direc=ASC"><i class="bi bi-arrow-up-short"></i></a>
+          </div>
+        </th scope="col">
+        <th scope="col">
+          <div>
+            Dept
+          </div>
+          <div>
+            <a href="app.ctrl.php?act=sort&col=dept&direc=DESC"><i class="bi bi-arrow-down-short"></i></a>
+            <a href="app.ctrl.php?act=sort&col=dept&direc=ASC"><i class="bi bi-arrow-up-short"></i></a>
+          </div>
+        </th>
+      </tr>
+
+      <?php foreach ($TPL['results'] as $row) { ?>
+      <tr>
+        <th style="width: 4em;" scope="row"><a title="delete" class="text-danger" href="app.ctrl.php?act=delete&id=<?=$row['id']?>"><i class="bi bi-trash"></i></a><a title="Edit" class="text-success" href="app.ctrl.php?act=edit&id=<?=$row['id']?>"><i class="bi bi-pencil-square"></i></a></th>
+        <td><?=$row['id']?></td>
+        <td><?=$row['lname']?></td>
+        <td><?=$row['fname']?></td>
+        <td><?=$row['phone']?></td>
+        <td><?=$row['email']?></td>
+        <td><?=$row['location']?></td>
+        <td><?=$row['mc']?></td>
+        <td><?=$row['pos']?></td>
+        <td><?=$row['dept']?></td>
+      </tr>
+      <?php } ?>
+    </table>
+  </div>
+  <div class="d-flex flex-row justify-content-end">
+    <div class="p-2">
+      <a href="errorlog.txt">Open Error Log</a>
+    </div>
+    <div class="p-2">
+      <a href="app.ctrl.php?act=sort&col=badsort&direc=DESC">Error Test</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

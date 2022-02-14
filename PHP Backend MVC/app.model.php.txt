@@ -1,0 +1,192 @@
+<?php
+// "StAuth10065: I Alec Pasion, 000811377 certify that this material is my original work. 
+// No other person's work has been used without due acknowledgement. 
+// I have not made my work available to anyone else."
+function deletePhone($conn, $id)
+{
+	try {
+	  $stmt = $conn->prepare("DELETE FROM phonebook WHERE id=?");
+	  $stmt->execute([$id]);
+	} catch (PDOException $e)
+	{
+    $error = array(
+      'time'=> date("F j, Y, g:i a"),
+      'sql'=> "DELETE FROM phonebook WHERE id=$id",
+      'mysqlerror'=> $e->getMessage(),
+      'filename'=> __FILE__,
+      'linenumber'=> __LINE__,
+      'remotehost'=> gethostbyaddr($_SERVER['REMOTE_ADDR']),
+      'clientip'=> $_SERVER['REMOTE_ADDR']
+    );
+    $fp = fopen('errorlog.txt', 'a');
+    fwrite($fp, print_r($error, true));
+    fclose($fp);
+    include 'app.errorview.php';
+	  exit();
+	}
+}
+
+function createPhone($conn, $fname, $lname, $phone, $email, $location, $mc, $pos, $dept)
+{
+	try {
+	  $stmt = $conn->prepare("INSERT INTO phonebook (id,fname,lname,phone,email,location,mc,pos,dept)".
+	                         " VALUES (?,?,?,?,?,?,?,?,?)");
+	  $stmt->execute([null,$fname, $lname, $phone, $email, $location, $mc, $pos, $dept]);
+	} catch (PDOException $e)
+	{
+    $error = array(
+      'time'=> date("F j, Y, g:i a"),
+      'sql'=> "INSERT INTO phonebook (id,fname,lname,phone,email,location,mc,pos,dept)",
+      'mysqlerror'=> $e->getMessage(),
+      'filename'=> __FILE__,
+      'linenumber'=> __LINE__,
+      'remotehost'=> gethostbyaddr($_SERVER['REMOTE_ADDR']),
+      'clientip'=> $_SERVER['REMOTE_ADDR']
+    );
+    $fp = fopen('errorlog.txt', 'a');
+    fwrite($fp, print_r($error, true));
+    fclose($fp);
+    include 'app.errorview.php';
+	  exit();
+	}
+}
+
+function readAllPhone($conn)
+{
+	$results = array();
+	
+	try 
+	{
+		$stmt = $conn->prepare("SELECT * FROM phonebook");
+		$stmt->execute();
+		while ($nextRow = $stmt->fetch()) $results[] = $nextRow;	
+		
+	}
+	catch (PDOException $e)
+	{
+    $error = array(
+      'time'=> date("F j, Y, g:i a"),
+      'sql'=> "SELECT * FROM phonebook",
+      'mysqlerror'=> $e->getMessage(),
+      'filename'=> __FILE__,
+      'linenumber'=> __LINE__,
+      'remotehost'=> gethostbyaddr($_SERVER['REMOTE_ADDR']),
+      'clientip'=> $_SERVER['REMOTE_ADDR']
+    );
+    $fp = fopen('errorlog.txt', 'a');
+    fwrite($fp, print_r($error, true));
+    fclose($fp);
+    include 'app.errorview.php';
+		exit();
+	}
+	
+	return $results;
+}
+
+function sortBook($conn,$col,$direction){
+  $results = array();
+  try 
+	{
+		$stmt = $conn->prepare("SELECT * FROM phonebook ORDER BY $col $direction");
+		$stmt->execute();
+		while ($nextRow = $stmt->fetch()) $results[] = $nextRow;	
+		
+	}
+	catch (PDOException $e)
+	{
+    $error = array(
+      'time'=> date("F j, Y, g:i a"),
+      'sql'=> "SELECT * FROM phonebook ORDER BY $col $direction",
+      'mysqlerror'=> $e->getMessage(),
+      'filename'=> __FILE__,
+      'linenumber'=> __LINE__,
+      'remotehost'=> gethostbyaddr($_SERVER['REMOTE_ADDR']),
+      'clientip'=> $_SERVER['REMOTE_ADDR']
+    );
+    $fp = fopen('errorlog.txt', 'a');
+    fwrite($fp, print_r($error, true));
+    fclose($fp);
+    include 'app.errorview.php';
+		exit();
+	}
+	
+	return $results;
+}
+
+function updatePhone($conn, $id, $fname, $lname, $phone, $email, $location, $mc, $pos, $dept){
+  try {
+	  $stmt = $conn->prepare("UPDATE phonebook SET fname = '$fname', lname='$lname', phone='$phone', email='$email', location='$location', mc='$mc', pos='$pos', dept='$dept' WHERE id=$id");
+	  $stmt->execute();
+	} catch (PDOException $e)
+	{
+    $error = array(
+      'time'=> date("F j, Y, g:i a"),
+      'sql'=> "UPDATE phonebook SET fname = '$fname', lname='$lname', phone='$phone', email='$email', location='$location', mc='$mc', pos='$pos', dept='$dept' WHERE id=$id",
+      'mysqlerror'=> $e->getMessage(),
+      'filename'=> __FILE__,
+      'linenumber'=> __LINE__,
+      'remotehost'=> gethostbyaddr($_SERVER['REMOTE_ADDR']),
+      'clientip'=> $_SERVER['REMOTE_ADDR']
+    );
+    $fp = fopen('errorlog.txt', 'a');
+    fwrite($fp, print_r($error, true));
+    fclose($fp);
+    include 'app.errorview.php';
+	  exit();
+	}
+}
+
+function getUserName($conn, $id){
+
+  try {
+    $stmt = $conn->prepare("SELECT lname, fname FROM phonebook WHERE id=?");
+    $stmt->execute([$id]);
+    $results = $stmt->fetch();
+	} catch (PDOException $e)
+	{
+    $error = array(
+      'time'=> date("F j, Y, g:i a"),
+      'sql'=> "SELECT lname, fname FROM phonebook WHERE id=?",
+      'mysqlerror'=> $e->getMessage(),
+      'filename'=> __FILE__,
+      'linenumber'=> __LINE__,
+      'remotehost'=> gethostbyaddr($_SERVER['REMOTE_ADDR']),
+      'clientip'=> $_SERVER['REMOTE_ADDR']
+    );
+    $fp = fopen('errorlog.txt', 'a');
+    fwrite($fp, print_r($error, true));
+    fclose($fp);
+    include 'app.errorview.php';
+	  exit();
+	}
+  return $results;
+}
+
+function populateFields($conn, $id)
+{
+  $results = array();
+	try {
+	  $stmt = $conn->prepare("SELECT * FROM phonebook WHERE id=?");
+	  $stmt->execute([$id]);
+    $results = $stmt->fetch();
+	} catch (PDOException $e)
+	{
+    $error = array(
+      'time'=> date("F j, Y, g:i a"),
+      'sql'=> "SELECT * FROM phonebook WHERE id=$id",
+      'mysqlerror'=> $e->getMessage(),
+      'filename'=> __FILE__,
+      'linenumber'=> __LINE__,
+      'remotehost'=> gethostbyaddr($_SERVER['REMOTE_ADDR']),
+      'clientip'=> $_SERVER['REMOTE_ADDR']
+    );
+    $fp = fopen('errorlog.txt', 'a');
+    fwrite($fp, print_r($error, true));
+    fclose($fp);
+    include 'app.errorview.php';
+	  exit();
+	}
+  return $results;
+}
+
+

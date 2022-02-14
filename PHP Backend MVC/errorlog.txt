@@ -1,0 +1,57 @@
+Array
+(
+    [time] => February 8, 2022, 4:32 am
+    [sql] => SELECT * FROM phonebook ORDER BY badsort DESC
+    [mysqlerror] => SQLSTATE[42S22]: Column not found: 1054 Unknown column 'badsort' in 'order clause'
+    [filename] => C:\xampp\htdocs\Assignment2\PartB\app.model.php
+    [linenumber] => 100
+    [remotehost] => DESKTOP-PDEHNPK
+    [clientip] => 127.0.0.1
+)
+Array
+(
+    [time] => February 8, 2022, 4:48 am
+    [sql] => SELECT * FROM phonebook ORDER BY badsort DESC
+    [mysqlerror] => SQLSTATE[42S22]: Column not found: 1054 Unknown column 'badsort' in 'order clause'
+    [filename] => C:\xampp\htdocs\Assignment2\PartB\app.model.php
+    [linenumber] => 102
+    [remotehost] => DESKTOP-PDEHNPK
+    [clientip] => 127.0.0.1
+)
+Array
+(
+    [time] => February 8, 2022, 6:20 pm
+    [dbconnerror] => SQLSTATE[HY000] [1049] Unknown database 'phonebook2'
+    [filename] => C:\xampp\htdocs\Assignment2\PartB\app.config.php
+    [linenumber] => 30
+    [remotehost] => DESKTOP-PDEHNPK
+    [clientip] => 127.0.0.1
+)
+Array
+(
+    [time] => February 8, 2022, 6:20 pm
+    [dbconnerror] => SQLSTATE[HY000] [1049] Unknown database 'phonebook2'
+    [filename] => C:\xampp\htdocs\Assignment2\PartB\app.config.php
+    [linenumber] => 30
+    [remotehost] => DESKTOP-PDEHNPK
+    [clientip] => 127.0.0.1
+)
+Array
+(
+    [time] => February 8, 2022, 6:20 pm
+    [dbconnerror] => SQLSTATE[HY000] [1049] Unknown database 'phonebook2'
+    [filename] => C:\xampp\htdocs\Assignment2\PartB\app.config.php
+    [linenumber] => 30
+    [remotehost] => DESKTOP-PDEHNPK
+    [clientip] => 127.0.0.1
+)
+Array
+(
+    [time] => February 8, 2022, 6:21 pm
+    [sql] => DB Connection
+    [mysqlerror] => SQLSTATE[HY000] [1049] Unknown database 'phonebook2'
+    [filename] => C:\xampp\htdocs\Assignment2\PartB\app.config.php
+    [linenumber] => 31
+    [remotehost] => DESKTOP-PDEHNPK
+    [clientip] => 127.0.0.1
+)

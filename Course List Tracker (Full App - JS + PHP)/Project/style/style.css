@@ -1,0 +1,60 @@
+* {
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
+}
+body {
+    background-color: #ffffff;
+    margin: 0;
+}
+.loginArea {
+    width: 25em;
+    background-color: #ebebeb;
+    box-shadow: 0 0 50px 0 rgba(0, 0, 0, 0.555);
+    margin: 100px auto;
+}
+.loginArea h1 {
+    text-align: center;
+    color: #5b6574;
+    font-size: 20px;
+    padding: 0.5em 0;
+    border-bottom: 1px solid #dee0e4;
+}
+
+.loginArea form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-top: 0.5em;
+}
+.loginArea form label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 3em;
+    height: 3em;
+    background-color: #6c7a8f;
+    color: #ffffff;
+}
+.loginArea form input[type="password"], .loginArea form input[type="text"] {
+    width: 20em;
+    height: 3.03em;
+    border: 1px solid #dee0e4;
+    margin-bottom: 20px;
+    padding: 0 15px;
+}
+.loginArea form input[type="submit"] {
+    width: 100%;
+    padding: 15px;
+    margin-top: 20px;
+    background-color: #63676d;
+    border: 0.5px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #ffffff;
+    transition: background-color 0.2s;
+}
+.loginArea form input[type="submit"]:hover {
+    background-color: #5d769c;
+    transition: background-color 0.15s;
+}

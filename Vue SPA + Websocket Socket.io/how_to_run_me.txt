@@ -1,0 +1,16 @@
+To run execute on the command line:
+
+npm install
+
+node server.js
+
+
+...then visit the url:
+
+localhost:3000/app
+
+
+The server randomly generates social media post data and sends it via 
+Websockets to the frontend of the application.
+
+Server.js was not made by me. It's only a sample backend for my Vue frontend

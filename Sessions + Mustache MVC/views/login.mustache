@@ -1,0 +1,47 @@
+<!-- 
+  "StAuth10222: I Alec Pasion, 000811377 certify that this material is my original work. 
+  No other person's work has been used without due acknowledgement. 
+  I have not made my work available to anyone else."
+ -->
+{{>header}}
+
+{{>navigation}}
+
+<div class="row">
+  <div class="leftcolumn">
+    <div class="card">
+    
+      {{#show_register}}
+        <h2>Sign up for an account</h2>
+        {{#show_successful}}
+          <p><strong>User account created! </strong><a href="../login">Login</a> to access your account</p>
+        {{/show_successful}}
+        <form action="/login/createnewaccount" method="post">
+          <label for="username">Username:</label>
+          <input type="text" name="username" required> <br /> <br />
+          <label for="password">Password:</label>
+          <input type="password" name="password" required> <br /> <br />
+          <input type="submit" value="Register">
+        </form> <br />
+      {{/show_register}}
+      {{#show_login}}
+        <h2>Login</h2>
+        <p>New User? <a href="/login/register">Sign Up</a></p>
+        <p>Enter your username and password below to login.</p>
+        <p style="color:red;">{{ login_error }}</p>
+        <form action="/login/attemptlogin" method="post">
+          <label for="username">Username:</label>
+          <input type="text" name="username" required> <br /> <br />
+          <label for="password">Password:</label>
+          <input type="password" name="password" required> <br /> <br />
+          <input type="submit" value="Login">
+        </form> <br />
+      {{/show_login}}
+    </div>
+  </div>
+
+  {{>sidebar}}
+
+</div>
+
+{{>footer}}

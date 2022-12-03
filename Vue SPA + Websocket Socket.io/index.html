@@ -1,0 +1,577 @@
+<html>
+<head>
+  <title>Social Media Disaster Monitoring Application</title>
+  <script src="https://unpkg.com/vue@3"></script>
+  <script src="https://unpkg.com/vuex@4"></script>
+  <script src="https://unpkg.com/vue-router@4"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.esm.js"></script>
+  <script nomodule src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ionic/core/css/ionic.bundle.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
+    *{
+      font-family: 'Raleway';
+    }
+    body{
+      background: honeydew;
+    }
+    a {padding: 10px;}
+    .feed-container {
+      width: 70%;
+      margin: auto;
+    }
+    .Critical {
+      color: red;
+    }
+    .Medium {
+      color: green;
+    }
+    .High {
+      color:goldenrod;
+    }
+    .Low {
+      color:blue
+    }
+    .problem_item ion-label{
+      text-align: right;
+    }
+    .table ion-col {
+      border: 1px solid gray;
+      text-align: center;
+    }
+    .problem_row {
+      background: lightslategray;
+      color: white;
+    }
+    .priority_column {
+      background-color: cornsilk;
+    }
+    .total_row,.total_column {
+      color: goldenrod;
+    }
+    .router-link-active {
+      color: white !important;
+      background: #1762a259;
+    }
+    .link-container {
+      text-align: center;
+      background: steelblue;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+    }
+    .link-container a {
+      color: honeydew;
+      text-decoration: none;
+      font-weight: bold;
+      display: flex;
+      padding: 0 max(1vw,16px);
+    }
+    .link-container a p{
+      align-self: center;
+      margin: 0;
+    }
+    .link-container a:hover {
+      background: #1762a259;
+    }
+    nav {
+      position: sticky;
+      height: 6vh;
+    }
+    .feed {
+      height: 94vh;
+    }
+    .feed .parent_row {
+      height: 94vh;
+    }
+    .feed .feed-parent {
+      height: 94vh;
+      overflow: auto;
+    }
+    .list-enter-active,
+    .list-leave-active {
+      transition: all 0.5s ease;
+    }
+    .list-enter-from {
+      opacity: 0;
+      transform: translatey(-30px);
+    }
+    .list-leave-to {
+      opacity: 0;
+      transform: translatey(-30px);
+    }
+    .home-container {
+      height: 94vh;
+      overflow-y: auto;
+      width: 100vw;
+    }
+    .home-container h2{
+      text-align: center;
+    }
+    .live-feed {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      margin-top: 3vh;
+    }
+    .sample-feed {
+      width: 40%;
+    }
+    .sample-table {
+      width: 80%;
+      margin-top: 3vh;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .home-content {
+      width: 60%;
+      margin: 2vh auto 0 auto;
+      font-size: max(3.5vh,32px);
+      color: darkslateblue;
+    }
+    h2 {
+      font-size: max(4vh,36px);
+    }
+    .col-parent {
+      margin-top: 8vh;
+    }
+    .feed {
+      background-color: white !important;
+    }
+    .sample-table ion-grid {
+      height: 167px;
+      overflow: hidden;
+    }
+    .analytics {
+      margin-top: 10vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <nav class="link-container">
+      <!-- use the router-link component for navigation. -->
+      <!-- specify the link by passing the `to` prop. -->
+      <!-- `<router-link>` will render an `<a>` tag with the correct `href` attribute -->
+      <router-link to="/" tag="p"><p>Home</p></router-link>
+      <router-link to="/feed" tag="p"><p>Live Feed</p></router-link>
+      <router-link to="/analytics" tag="p"><p>Analytics</p></router-link>
+      </nav>
+    <!-- route outlet -->
+    <!-- component matched by the route will render here -->
+    <router-view v-bind:articles="$store.state.articles" ref="view"></router-view>
+  </div>
+<script>
+
+  var socket = io();
+  const plugin = function createWebSocketPlugin() {
+    return (store) => {
+      socket.on('post', data => {
+        let id = store.state.articles.length + 1;
+        data.id = id;
+        store.dispatch('update_articles',data)
+      });
+    }
+  }
+
+  const store = Vuex.createStore({
+    state () { return {
+      articles: [],
+      problem:"all",
+      priority:"all"
+    } },
+
+    mutations: {
+      update_articles(state, data) {
+        state.articles.unshift(data);
+      },
+      update_priority(state,data){
+        state.priority == data
+      },
+      update_problem(state,data){
+        console.log("updating problem")
+        state.problem = data
+      }
+    },
+    actions: {
+      update_articles (context,data) {
+        context.commit('update_articles',data);
+      },
+      update_priority (context,data) {
+        context.commit('update_priority',data);
+      },
+      update_problem (context,data) {
+        context.commit('update_problem',data);
+      },
+    },
+    getters:{
+      articles: state => {
+        let return_data = state.articles;
+        if(state.problem == "all"){
+          return_data = state.articles;
+        }else{
+
+        }
+        if(state.priority != "all"){
+          return_data = return_data.filter(x => x.priority == state.priority);
+        }
+        return return_data;
+      }
+    },
+    plugins: [plugin()],
+  });
+
+  const LiveFeed = {
+    props:['articles'],
+    data(){
+      return {
+        priority:"all",
+        problem:"all",
+        article_feed:this.articles,
+        filters:{
+          fire:true,
+          power:true,
+          flood:true,
+          medical:true,
+          low:true,
+          medium:true,
+          high:true,
+          critical:true
+        }
+      }
+    },
+    template:
+      `
+      <ion-grid class="feed" :lang="''">
+        <ion-row class="parent_row">
+          <ion-col size="3">
+            <ion-item class="problem_item">
+              <ion-label  color="primary">Problem Filters</ion-label>
+            </ion-item>
+            <ion-item class="problem_item">
+              <ion-checkbox slot="end" @ionChange="filter_data($event)" id="fire_checkbox" checked></ion-checkbox>
+              <ion-label>Fire</ion-label>
+            </ion-item>
+            <ion-item class="problem_item">
+              <ion-checkbox slot="end" @ionChange="filter_data($event)" id="flood_checkbox" checked></ion-checkbox>
+              <ion-label>Flood</ion-label>
+            </ion-item>
+            <ion-item class="problem_item">
+              <ion-checkbox slot="end" @ionChange="filter_data($event)" id="power_checkbox" checked></ion-checkbox>
+              <ion-label>Power</ion-label>
+            </ion-item>
+            <ion-item class="problem_item">
+              <ion-checkbox slot="end" @ionChange="filter_data($event)" id="medical_checkbox" checked></ion-checkbox>
+              <ion-label>Medical</ion-label>
+            </ion-item>
+          </ion-col>
+          <ion-col class="feed-parent" size="6">
+            <TransitionGroup name="list" tag="div" class="feed-container">
+              <div v-for="article in article_feed" :key="article.id" ref="articles" 
+                v-show="(article.problem == 'Medical' && filters.medical == true || article.problem == 'Flood' && filters.flood == true || article.problem == 'Power' && filters.power == true || article.problem == 'Fire' && filters.fire == true) && (article.priority == 'Low' && filters.low == true || article.priority == 'Medium' && filters.medium == true || article.priority == 'High' && filters.high == true || article.priority == 'Critical' && filters.critical == true)">
+                <ion-card>
+                  <ion-grid :lang="''">
+                    <ion-row>
+                      <ion-col size="1.5">
+                        <ion-card-header>
+                          <ion-avatar>
+                            <img alt="Silhouette of a person's head" :src=article.image />
+                          </ion-avatar>
+                        </ion-card-header>
+                      </ion-col>
+                      <ion-col size="10.5">
+                        <ion-card-header>
+                          <ion-card-title>{{article.name}}</ion-card-title>
+                          <ion-card-subtitle><b>Priority: </b><span :class=article.priority>{{article.priority}}</span> | <b>Problem: </b>{{article.problem}}</ion-card-subtitle>
+                        </ion-card-header>
+                        <ion-card-content>
+                        <p>{{article.content}}</p>
+                        </ion-card-content>
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
+                </ion-card>
+              </div>
+            </TransitionGroup>
+          </ion-col>
+          <ion-col size="3">
+            <ion-item>
+              <ion-label color="primary">Priority Filters</ion-label>
+            </ion-item>
+            <ion-item>
+              <ion-checkbox slot="start" @ionChange="filter_data($event)" id="low_checkbox" checked></ion-checkbox>
+              <ion-label>Low</ion-label>
+            </ion-item>
+            <ion-item>
+              <ion-checkbox slot="start" @ionChange="filter_data($event)" id="medium_checkbox" checked></ion-checkbox>
+              <ion-label>Medium</ion-label>
+            </ion-item>
+            <ion-item>
+              <ion-checkbox slot="start" @ionChange="filter_data($event)" id="high_checkbox" checked></ion-checkbox>
+              <ion-label>High</ion-label>
+            </ion-item>
+            <ion-item>
+              <ion-checkbox slot="start" @ionChange="filter_data($event)" id="critical_checkbox" checked></ion-checkbox>
+              <ion-label>Critical</ion-label>
+            </ion-item>
+          </ion-col>
+        </ion-row
+      </ion-grid>
+      `
+      ,
+    computed: {
+      articles_computed(){
+        return this.$store.getters.articles
+      }
+    },
+    methods: {
+      filter_data(component){
+        if(component.target.id == "fire_checkbox"){
+          this.filters.fire = component.detail.checked
+        }
+        else if(component.target.id == "flood_checkbox"){
+          this.filters.flood = component.detail.checked
+        }
+        else if(component.target.id == "power_checkbox"){
+          this.filters.power = component.detail.checked
+        }
+        else if(component.target.id == "medical_checkbox"){
+          this.filters.medical = component.detail.checked
+        }
+        else if(component.target.id == "low_checkbox"){
+          this.filters.low = component.detail.checked
+        }
+        else if(component.target.id == "medium_checkbox"){
+          this.filters.medium = component.detail.checked
+        }
+        else if(component.target.id == "high_checkbox"){
+          this.filters.high = component.detail.checked
+        }
+        else if(component.target.id == "critical_checkbox"){
+          this.filters.critical = component.detail.checked
+        }
+      }
+    }
+  }
+  const Home = {
+    template: `
+      <ion-grid class="home-container">
+        <ion-row>
+          <ion-col size=6 class="col-parent">
+            <h2>Live Feed</h2>
+            <div class="live-feed">
+              <ion-card class="sample-feed">
+                <ion-grid :lang="''">
+                  <ion-row>
+                    <ion-col size="3">
+                      <ion-card-header>
+                        <ion-avatar>
+                          <img alt="Silhouette of a person's head" src="https://ionicframework.com/docs/img/demos/avatar.svg" />
+                        </ion-avatar>
+                      </ion-card-header>
+                    </ion-col>
+                    <ion-col size="9">
+                      <ion-card-header>
+                        <ion-card-title><ion-skeleton-text :animated="false" style="width: 30%;"></ion-skeleton-text></ion-card-title>
+                        <ion-card-subtitle><ion-skeleton-text :animated="false" style="width: 40%;"></ion-skeleton-text></ion-card-subtitle>
+                      </ion-card-header>
+                      <ion-card-content>
+                        <p>
+                          <ion-skeleton-text :animated="false" style="width: 80%;"></ion-skeleton-text>
+                        </p>
+                        <p>
+                          <ion-skeleton-text :animated="false" style="width: 80%;"></ion-skeleton-text>
+                        </p>
+                        <p>
+                          <ion-skeleton-text :animated="false" style="width: 50%;"></ion-skeleton-text>
+                        </p>
+                      </ion-card-content>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </ion-card>
+              <ion-card class="sample-feed">
+                <ion-grid :lang="''">
+                  <ion-row>
+                    <ion-col size="3">
+                      <ion-card-header>
+                        <ion-avatar>
+                          <img alt="Silhouette of a person's head" src="https://ionicframework.com/docs/img/demos/avatar.svg" />
+                        </ion-avatar>
+                      </ion-card-header>
+                    </ion-col>
+                    <ion-col size="9">
+                      <ion-card-header>
+                        <ion-card-title><ion-skeleton-text :animated="false" style="width: 30%;"></ion-skeleton-text></ion-card-title>
+                        <ion-card-subtitle><ion-skeleton-text :animated="false" style="width: 40%;"></ion-skeleton-text></ion-card-subtitle>
+                      </ion-card-header>
+                      <ion-card-content>
+                        <p>
+                          <ion-skeleton-text :animated="false" style="width: 80%;"></ion-skeleton-text>
+                        </p>
+                        <p>
+                          <ion-skeleton-text :animated="false" style="width: 80%;"></ion-skeleton-text>
+                        </p>
+                        <p>
+                          <ion-skeleton-text :animated="false" style="width: 50%;"></ion-skeleton-text>
+                        </p>
+                      </ion-card-content>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </ion-card>
+            </div>
+            <div class="home-content">
+              <p>Discover and monitor disaster related social media content in real-time with our powerful<br> <b>Social Media Content Analyzer</b></p>
+            </div>
+          </ion-col>
+          <ion-col size=6 class="col-parent">
+            <h2>Analytics</h2>
+            <div class="sample-table">
+              <ion-grid :fixed="true" class="table">
+                <ion-row class="problem_row">
+                  <ion-col></ion-col>
+                  <ion-col>Fire</ion-col>
+                  <ion-col>Flood</ion-col>
+                  <ion-col>Power</ion-col>
+                  <ion-col>Medical</ion-col>
+                  <ion-col class="total_column">Total</ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col class="priority_column">Low</ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col class="priority_column">Medium</ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col class="priority_column">High</ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col class="priority_column">Critical</ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                </ion-row>
+                <ion-row class="total_row">
+                  <ion-col class="priority_column">Total</ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                  <ion-col></ion-col>
+                </ion-row>
+              </ion-grid>
+            </div>
+            <div class="home-content">
+              <p>Discover all of the content from our <b>Social Media Content Analyzer</b> by the numbers!</p>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    `
+  }
+  const Analytics = {
+    props:['articles'],
+    data(){
+      return {
+        fire:{
+          low: this.articles.filter(x=>x.problem=="Fire" && x.priority=="Low").length,
+          medium: this.articles.filter(x=>x.problem=="Fire" && x.priority=="Medium").length,
+          high: this.articles.filter(x=>x.problem=="Fire" && x.priority=="High").length,
+          critical: this.articles.filter(x=>x.problem=="Fire" && x.priority=="Critical").length,
+        }
+      }
+    },
+    template: `
+      <div class="analytics">
+        <ion-grid :fixed="true" class="table">
+          <ion-row class="problem_row">
+            <ion-col></ion-col>
+            <ion-col>Fire</ion-col>
+            <ion-col>Flood</ion-col>
+            <ion-col>Power</ion-col>
+            <ion-col>Medical</ion-col>
+            <ion-col class="total_column">Total</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col class="priority_column">Low</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Fire" && x.priority=="Low").length}}</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Flood" && x.priority=="Low").length}}</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Power" && x.priority=="Low").length}}</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Medical" && x.priority=="Low").length}}</ion-col>
+            <ion-col class="total_column">{{articles.filter(x=>x.priority=="Low").length}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col class="priority_column">Medium</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Fire" && x.priority=="Medium").length}}</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Flood" && x.priority=="Medium").length}}</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Power" && x.priority=="Medium").length}}</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Medical" && x.priority=="Medium").length}}</ion-col>
+            <ion-col class="total_column">{{articles.filter(x=>x.priority=="Medium").length}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col class="priority_column">High</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Fire" && x.priority=="High").length}}</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Flood" && x.priority=="High").length}}</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Power" && x.priority=="High").length}}</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Medical" && x.priority=="High").length}}</ion-col>
+            <ion-col class="total_column">{{articles.filter(x=>x.priority=="High").length}}</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col class="priority_column">Critical</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Fire" && x.priority=="Critical").length}}</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Flood" && x.priority=="Critical").length}}</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Power" && x.priority=="Critical").length}}</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Medical" && x.priority=="Critical").length}}</ion-col>
+            <ion-col class="total_column">{{articles.filter(x=>x.priority=="Critical").length}}</ion-col>
+          </ion-row>
+          <ion-row class="total_row">
+            <ion-col class="priority_column">Total</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Fire").length}}</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Flood").length}}</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Power").length}}</ion-col>
+            <ion-col>{{articles.filter(x=>x.problem=="Medical").length}}</ion-col>
+            <ion-col>{{articles.length}}</ion-col>
+          </ion-row>
+        </ion-grid>
+      </div>
+    `
+  }
+  const routes = [
+    { path: '/', component: Home},
+    { path: '/feed', component: LiveFeed },
+    { path: '/analytics', component: Analytics },
+  ]
+
+  const router = VueRouter.createRouter({
+    history: VueRouter.createWebHashHistory(),
+    routes, 
+  });
+
+  const app = Vue.createApp({
+  });
+  app.config.compilerOptions.isCustomElement = (tag) => tag.startsWith('ion-')
+  app.use(store)
+  app.use(router)
+  app.mount("#app");
+</script>
+</body>
+</html>

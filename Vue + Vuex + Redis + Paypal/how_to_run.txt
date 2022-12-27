@@ -1,0 +1,13 @@
+*Data generation (Datagen folder) is not made by me. It is used for data generation and redis pub
+
+1. Open terminal/shell
+2. go to "app" directory
+3. run "npm install" command
+4. run "node server.js" command
+
+5. open another terminal/shell
+6. go to "datagen" directory
+7. run "npm install" command
+8. run "node datagen.js" command
+
+9. Open browser and go to http://localhost:3000

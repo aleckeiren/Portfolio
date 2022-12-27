@@ -1,0 +1,531 @@
+<!-- 
+  "StAuth10222: I Alec Pasion, 000811377 certify that this material is my original work. 
+  No other person's work has been used without due acknowledgement. 
+  I have not made my work available to anyone else."
+ -->
+<!DOCTYPE html>
+<head>
+  <title>PayPal Demo</title>
+  <script src="https://www.paypal.com/sdk/js?currency=CAD&client-id=AfAXGp21H1a4kzv_VqXRUZ239w18cJmGfzgI6qK5P6wXUsVEXC-nhKTEdFX7rg6mahu3h-XCqErdrlBI"></script>
+  <script src="https://unpkg.com/vue@3"></script>
+  <script src="https://unpkg.com/vuex@4"></script>
+  <script src="https://unpkg.com/vue-router@4"></script>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.esm.js"></script>
+  <script nomodule src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ionic/core/css/ionic.bundle.css" />
+  <script src="https://www.paypal.com/sdk/js?currency=CAD&client-id=AfAXGp21H1a4kzv_VqXRUZ239w18cJmGfzgI6qK5P6wXUsVEXC-nhKTEdFX7rg6mahu3h-XCqErdrlBI"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://kit.fontawesome.com/44b188095b.js" crossorigin="anonymous"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
+    *{
+      font-family: 'Raleway';
+    }
+    .list-enter-active,
+    .list-leave-active {
+    transition: all 0.1s ease;
+    }
+    .list-enter-from {
+    opacity: 0;
+    transform: translatey(-30px);
+    }
+    .list-leave-to {
+    opacity: 0;
+    transform: translatey(-30px);
+    }
+    .item-card {
+        width: 80%;
+    }
+    .item-right {
+        text-align: right;
+    }
+    .type {
+        text-transform: capitalize;
+    }
+    ion-card {
+        margin: auto;
+        margin-bottom: 1em;
+    }
+    .quantity {
+      display: flex;
+      flex-direction: row;
+      width: 45%;
+    }
+    .quantity b {
+      height: min-content;
+      align-self: center;
+    }
+    .feed-container {
+      height: 91vh;
+      overflow: scroll;
+    }
+    .feed-header {
+      text-align: center;
+    }
+    .cart-container{
+      height: 40vh;
+      overflow: scroll;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin-left: 2%;
+      margin-right: 2%;
+      background: #e3e3e3;
+      border-radius: 20px;
+      padding-top: 1em;
+      padding-bottom: 1em;
+    }
+    .cart-container .parent-div{
+      width: 45%;
+    }
+    .checkout-container {
+      height: 91vh;
+      overflow: auto;
+    }
+    .check-button {
+      width: 100%;
+    }
+    header {
+      height: 4vh;
+      margin-bottom: 1vh;
+      text-align: center;
+      width: 100%;
+      background: #2c2c8c;
+    }
+    header h2 {
+      font-size: 3vh;
+      color: white;
+    }
+    .total {
+      text-align: right;
+      margin-bottom: 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Food Shopping</h3>
+  </header>
+  <div id="app">
+    <router-view v-bind:breads="$store.state.breads" v-bind:vegetables="$store.state.vegetables" v-bind:fruits="$store.state.fruits" v-bind:cart="$store.state.cart" ref="view"></router-view>
+  </div>
+  <div class="modal fade" id="approvedModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Transaction Approved</h5>
+        </div>
+        <div class="modal-body">
+          <p>Purchase is complete.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary"  data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="coModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Check Out</h5>
+        </div>
+        <div class="modal-body">
+          <div id="paypal"></div>
+          <div id="order_details">
+            <div id="detail_display"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
+    let cart_items = [];
+    const plugin = function createWebSocketPlugin() {
+    return (store) => {
+            socket.on('loaddata', data => {
+                let breads = JSON.parse(data.breads);
+                let vegetables = JSON.parse(data.vegetables);
+                let fruits = JSON.parse(data.fruits);
+                breads.forEach(element => {
+                    store.dispatch('update_breads',element); 
+                });
+                vegetables.forEach(element => {
+                    store.dispatch('update_vegetables',element)
+                });
+                fruits.forEach(element => {
+                    store.dispatch('update_fruits',element)
+                });
+            });
+            socket.on("newfruit", function(data) {
+                store.dispatch('update_fruits',data); 
+            });
+            socket.on("newveg", function(data) {
+                store.dispatch('update_vegetables',data)
+            });
+            socket.on("newbread", function(data) {
+                store.dispatch('update_breads',data)
+            });
+
+        }
+    }
+    window.addEventListener("load", function () {
+
+      // initially hide the order confirmation details and confirm button
+      document.getElementById("order_details").style = "display: none";
+
+      // renders the paypal buttons in the div with id #paypal
+      paypal
+        .Buttons({
+
+          // makes an AJAX request to the backend to create the order
+          createOrder: function () {
+            return fetch("/create-order", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                body: JSON.stringify(cart_items)
+              },
+              // we could send data about the items being purchased as JSON data
+              // here, and the backend could figure out the price and what is
+              // being purchaed based on this
+              body: JSON.stringify({test:"hello"}),
+            })
+              .then(res => {
+                if (res.ok) return res.json()
+                return res.json().then(json => Promise.reject(json))
+              })
+              .then(({ id }) => {
+                return id
+              })
+              .catch(e => {
+                console.error(e.error)
+              })
+          },
+          // when the order has been approved, allow the user to confirm the order
+          // by clicking a confirm button
+          onApprove: function (data, actions) {
+            document.getElementById('coModal').classList.remove("show");
+            document.getElementById('coModal').hidden = true;
+            document.querySelectorAll(".modal-backdrop").forEach(el => el.remove());
+            return actions.order.get().then(function (orderDetails) {
+                store.dispatch('remove_all')
+                document.getElementById('price').textContent = 0;
+                document.getElementById("order_details").style = "display: block";
+                return actions.order.capture().then(function () {
+                  var myModal = new bootstrap.Modal(document.getElementById('approvedModal'))
+                  myModal.show();
+                });
+            });
+          }}).render("#paypal")
+  });
+    const store = Vuex.createStore({
+    state () { return {
+            breads: [],
+            vegetables: [],
+            fruits: [],
+            cart:[]
+        } },
+
+        mutations: {
+            readd_bread(state,data){
+              state.breads.unshift(data);
+            },
+            readd_fruit(state,data){
+              state.fruits.unshift(data);
+            },
+            readd_vegetable(state,data){
+              state.vegetables.unshift(data);
+            },
+            update_breads(state, data) {
+              state.breads.push(data);
+            },
+            update_vegetables(state, data) {
+              state.vegetables.push(data);
+            },
+            update_fruits(state, data) {
+              state.fruits.push(data);
+            },
+            update_cart(state, data) {
+              const found = state.cart.some(el => el.item.id == data.data.id);
+              let type = data.type;
+              if(!found){
+                let itemToAdd = {item:JSON.parse(JSON.stringify(data.data)),quantity:1,food_type:type}
+                if(type == "bread"){
+                  let index = state.breads.findIndex(p => p.id == data.data.id);
+                  store.dispatch('remove_bread',index)
+                }
+                else if(type == "vegetable"){
+                  let index = state.vegetables.findIndex(p => p.id == data.data.id);
+                  store.dispatch('remove_vegetable',index)
+                }
+                else {
+                  let index = state.fruits.findIndex(p => p.id == data.data.id);
+                  store.dispatch('remove_fruit',index)
+                }
+                state.cart.push(itemToAdd);
+                cart_items.push(itemToAdd);
+                total = 0;
+                state.cart.forEach(element => {
+                  total += element.item.price;
+                });
+                document.getElementById('price').textContent = total;
+              }
+            },
+            remove_item(state, data) {
+              let itemToRemove = JSON.parse(JSON.stringify(data.item))
+              let index = state.cart.findIndex(p => p.item.id == data.item.id);
+              let index2 = cart_items.findIndex(p => p.item.id == data.item.id);
+              state.cart.splice(index, 1);
+              cart_items.splice(index,1);
+              if(data.food_type == "bread"){
+                store.dispatch('readd_bread',itemToRemove)
+              }
+              else if(data.food_type == "vegetable"){
+                store.dispatch('readd_fruit',itemToRemove)
+              }
+              else {
+                store.dispatch('readd_vegetable',itemToRemove)
+              }
+              total = 0;
+              state.cart.forEach(element => {
+                total += element.item.price;
+              });
+              document.getElementById('price').textContent = total;
+            },
+            remove_fruit(state, index) {
+              state.fruits.splice(index, 1);
+            },
+            remove_bread(state, index) {
+              state.breads.splice(index, 1);
+            },
+            remove_vegetable(state, index) {
+              state.vegetables.splice(index, 1);
+            },
+            remove_all(state){
+              socket.emit('remove',JSON.stringify(state.cart))
+              for (var i = state.cart.length - 1; i >= 0; i--) {
+                state.cart.splice(i, 1);
+                cart_items.splice(i,1);
+              }
+            }
+        },
+        actions: {
+            readd_bread(context,data){
+              context.commit('readd_bread',data);
+            },
+            readd_fruit(context,data){
+              context.commit('readd_fruit',data);
+            },
+            readd_vegetable(context,data){
+              context.commit('readd_vegetable',data);
+            },
+            update_breads (context,data) {
+                context.commit('update_breads',data);
+            },
+            update_vegetables (context,data) {
+                context.commit('update_vegetables',data);
+            },
+            update_fruits (context,data) {
+                context.commit('update_fruits',data);
+            },
+            update_cart (context,data) {
+                context.commit('update_cart',data);
+            },
+            remove_item (context,data) {
+                context.commit('remove_item',data);
+            },
+            remove_fruit (context,index) {
+                context.commit('remove_fruit',index);
+            },
+            remove_bread (context,index) {
+                context.commit('remove_bread',index);
+            },
+            remove_vegetable (context,index) {
+                context.commit('remove_vegetable',index);
+            },
+            remove_all (context) {
+                context.commit('remove_all');
+            },
+        },
+        getters:{
+            breads: state => {
+                let return_data = state.breads;
+                return return_data;
+            },
+            vegetables: state => {
+                let return_data = state.vegetables;
+                return return_data;
+            },
+            fruits: state => {
+                let return_data = state.fruits;
+                return return_data;
+            },
+            cart: state => {
+                let return_data = state.cart;
+                return return_data;
+            }
+        },
+        plugins: [plugin()],
+    });
+    const Home = {
+        props:['breads','fruits','vegetables','cart'],
+        data(){
+        return {
+            bread_feed:this.breads,
+            fruit_feed:this.fruits,
+            vegetable_feed:this.vegetables,
+            cart_feed:this.cart,
+            total_price:0
+        }
+    },
+    template:
+        `
+        <ion-grid class="feed" :lang="''">
+            <ion-row class="parent_row">
+                <ion-col size="2.5">
+                  <h3 class="feed-header">
+                    Breads
+                  </h3>
+                    <TransitionGroup name="list" tag="section" class="feed-container">
+                        <div v-for="bread in bread_feed" :key="bread.id" ref="breads">
+                            <ion-card class="item-card">
+                                <ion-grid :lang="''">
+                                    <ion-row>
+                                        <ion-col size="6">
+                                            <p><b>Type:</b> <span class="type">{{bread.type}}</span></p>
+                                            <p><b>Calories:</b> {{bread.calories}}</p>
+                                        </ion-col>
+                                        <ion-col class="item-right" size="6">
+                                            <p><b>Grams:</b> {{bread.grams}}</p>
+                                            <p><b>Price:</b> $ {{bread.price}}</p>
+                                            <ion-button v-on:click="add_to_cart(bread,'bread')"><ion-icon name="add"></ion-icon><ion-icon name="cart-outline"></ion-icon></ion-button>
+                                        </ion-col>
+                                    </ion-row>
+                                </ion-grid>
+                            </ion-card>
+                        </div>
+                    </TransitionGroup>
+                </ion-col>
+                <ion-col size="2.5">
+                  <h3 class="feed-header">
+                    Fruits
+                  </h3>
+                    <TransitionGroup name="list" tag="section" class="feed-container">
+                        <div v-for="fruit in fruit_feed" :key="fruit.id" ref="fruits">
+                            <ion-card class="item-card">
+                                <ion-grid :lang="''">
+                                    <ion-row>
+                                        <ion-col size="6">
+                                            <p><b>Type:</b> <span class="type">{{fruit.type}}</span></p>
+                                            <p><b>Calories:</b> {{fruit.calories}}</p>
+                                        </ion-col>
+                                        <ion-col class="item-right" size="6">
+                                            <p><b>Grams:</b> {{fruit.grams}}</p>
+                                            <p><b>Price:</b> $ {{fruit.price}}</p>
+                                            <ion-button v-on:click="add_to_cart(fruit,'fruit')"><ion-icon name="add"></ion-icon><ion-icon name="cart-outline"></ion-icon></ion-button>
+                                        </ion-col>
+                                    </ion-row>
+                                </ion-grid>
+                            </ion-card>
+                        </div>
+                    </TransitionGroup>
+                </ion-col>
+                <ion-col size="2.5">
+                  <h3 class="feed-header">
+                    Vegetables
+                  </h3>
+                    <TransitionGroup name="list" tag="section" class="feed-container">
+                        <div v-for="vegetable in vegetable_feed" :key="vegetable.id" ref="fruits">
+                            <ion-card class="item-card">
+                                <ion-grid :lang="''">
+                                    <ion-row>
+                                        <ion-col size="6">
+                                            <p><b>Type:</b> <span class="type">{{vegetable.type}}</span></p>
+                                            <p><b>Calories:</b> {{vegetable.calories}}</p>
+                                        </ion-col>
+                                        <ion-col class="item-right" size="6">
+                                            <p><b>Grams:</b> {{vegetable.grams}}</p>
+                                            <p><b>Price:</b> $ {{vegetable.price}}</p>
+                                            <ion-button v-on:click="add_to_cart(vegetable,'vegetable')"><ion-icon name="add"></ion-icon><ion-icon name="cart-outline"></ion-icon></ion-button>
+                                        </ion-col>
+                                    </ion-row>
+                                </ion-grid>
+                            </ion-card>
+                        </div>
+                    </TransitionGroup>
+                </ion-col>
+                <ion-col size="4.5" class="checkout-container">
+                  <h3 class="feed-header">
+                    <ion-icon name="cart-outline"></ion-icon>
+                  </h3>
+                    <TransitionGroup name="list" tag="section" class="cart-container">
+                        <div v-for="item in cart_feed" :key="item.item.id" class="parent-div">
+                            <ion-card class="item-card">
+                                <ion-grid :lang="''">
+                                    <ion-row>
+                                        <ion-col size="6">
+                                            <p><b>Type:</b> <span class="type">{{item.item.type}}</span></p>
+                                            <p><b>Calories:</b> {{item.item.calories}}</p>
+                                        </ion-col>
+                                        <ion-col class="item-right" size="6">
+                                            <p><b>Grams:</b> {{item.item.grams}}</p>
+                                            <p><b>Price:</b> $ {{item.item.price}}</p>
+                                            <ion-button v-on:click="remove_from_cart(item,item.food_type)" color="danger"><ion-icon name="remove-outline"></ion-icon><ion-icon name="cart-outline"></ion-icon></ion-button>
+                                        </ion-col>
+                                    </ion-row>
+                                </ion-grid>
+                            </ion-card>
+                        </div>
+                    </TransitionGroup>
+                    <p class="total"><b>Total:</b> {{'$'}}<span id="price">0</span></p>
+                    <ion-button class="check-button" color="success" v-on:click="check_out()">Check Out</ion-button>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+        `
+      ,
+    methods: {
+      add_to_cart(data,type){
+        let payload = {data:data,type:type}
+        store.dispatch('update_cart',payload)
+      },
+      remove_from_cart(data){
+        store.dispatch('remove_item',data)
+      },
+      check_out() {
+        if(this.cart_feed.length != 0){
+          var coModal = new bootstrap.Modal(document.getElementById('coModal'))
+          document.getElementById('coModal').hidden = false;
+          coModal.show();
+        }
+      },
+    },
+    }
+    const CheckOut = {
+      template: `
+      `
+    }
+    const routes = [
+        { path: '/', component: Home},
+        { path: '/checkout', component: CheckOut },
+    ]
+
+    const router = VueRouter.createRouter({
+        history: VueRouter.createWebHashHistory(),
+        routes, 
+    });
+
+    const app = Vue.createApp({
+    });
+    app.config.compilerOptions.isCustomElement = (tag) => tag.startsWith('ion-')
+    app.use(store)
+    app.use(router)
+    app.mount("#app");
+  </script>
+</body>
+</html>

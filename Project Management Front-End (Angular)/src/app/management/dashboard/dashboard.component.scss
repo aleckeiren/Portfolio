@@ -1,0 +1,103 @@
+.dashboard-container {
+    height: 100%;
+    .parent-grid{
+        height: 100%;
+    }
+    height: 100%;
+    overflow-y: auto;
+}
+
+h3,h2 {
+    font-weight: 500;
+    color: gray;
+    font-size: max(1vw,23px);
+}
+#event_container {
+    margin: max(1vw,1em);
+}
+#event_owner {
+    font-size: max(0.9vw,16px);
+    align-self: center;
+}
+
+#project_name h4, #dates p {
+    font-size: max(0.8vw,15px);
+    margin-bottom: 0;
+    line-height: initial;
+}
+
+#start {
+    margin-bottom: max(0.3vw,10px) !important;
+}
+#name{
+    font-size: max(1.1vw,18px);
+    margin-bottom: max(0.6vw, 14px);
+    color: lightseagreen;
+}
+.In{
+    #status,h4 {
+        color: darkcyan !important;
+    }
+}
+.Done{
+    #status,h4 {
+        color: green !important;
+    }
+}
+.New{
+    #status,h4 {
+        color: darkgoldenrod !important
+    }
+}
+#target_date {
+    align-self: center;
+}
+#subheader,#target_date {
+    font-size: max(0.9vw,16px);
+    margin-bottom: max(0.5vw,13px) 
+}
+.progress {
+    font-size: max(0.7vw,14px);
+}
+.cards-grid {
+    margin-left: 3vw;
+    margin-right: 3vw;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+ion-progress-bar {
+    height: max(0.3vw,6px);
+}
+.summary-row {
+    flex: 0 0 auto;
+}
+.container{
+    height: 100%;
+}
+.card-projects {
+    flex: 0 1 auto;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.clickable{
+    cursor: pointer;
+    transition: 0.2s;
+    margin-bottom: 1em;
+}
+
+.clickable:hover{
+    -webkit-box-shadow: 0px 0px 15px 6px rgba(0,0,0,0.4); 
+    box-shadow: 0px 0px 15px 6px rgba(0,0,0,0.4);
+}
+@media (max-width:991px){
+    mat-drawer {
+        width: 70% !important;
+    }
+}
+@media (max-width:549px){
+    mat-drawer {
+        width: 100% !important;
+    }
+}

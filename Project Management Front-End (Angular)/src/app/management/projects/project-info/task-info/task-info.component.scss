@@ -1,0 +1,35 @@
+ion-popover {
+    --min-width: 300px;
+}
+.info_header {margin-bottom: 0;}
+.info_text {
+    font-size: 1.5em;
+    font-weight: 300;
+}
+ion-input {
+    --padding-top: 0;
+    --padding-start:0;
+}
+ion-grid {
+    padding: 2vw;
+}
+ion-input,ion-textarea {
+    font-size: max(0.7vw, 20px);
+}
+ion-label {
+    font-size: max(0.4vw,18px);
+}
+target_item::part(native){
+    padding-left: 0;
+}
+.item-interactive-disabled:not(.item-multiple-inputs) .sc-ion-label-md-h{
+    opacity: 1;
+}
+.task-info-container {
+    height: 95vh;
+    overflow-y: auto;
+    width: 100%;
+}
+@media (max-width:549px){
+    
+}

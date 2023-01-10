@@ -1,0 +1,203 @@
+<div *ngIf="loaded" class="container">
+    <mat-drawer-container (backdropClick)="setNoSelected()" [hasBackdrop]="true" style="min-height: 100vh;background: none;">
+        <mat-drawer #drawer mode="over" position="end" style="width: 40%;" (keydown.escape)="setNoSelected()" (closed)="setNoSelected()">
+            <div *ngIf="taskSelected else eventSelected">
+                <task-info [task]="selectedTask" [account_id]="account_id" [drawer]="drawer" [allTasks]="selectedTaskProjectTasks"></task-info>
+            </div>
+            <ng-template #eventSelected>
+                <div *ngIf="isSelected">
+                    <event-info [event]="selectedEvent" [projectId]="selectedEvent['project_id']" [account_id]="account_id" [drawer]="drawer"></event-info>
+                </div>
+            </ng-template>
+        </mat-drawer>
+        <mat-drawer-content style="overflow-y: hidden;background: none;">
+            <ion-grid class="dashboard-container">
+                <ion-row class="parent-grid">
+                    <ion-col style="padding-left: 0.5em;padding-right: 0.5em;" size-lg="6" size-xl="4.25" size-md="6" size-sm="12" size-xs="12">
+                        <ion-grid class="cards-grid">
+                            <ion-row class="summary-row">
+                                <ion-col size="12"><h2 style="margin-bottom: 0;">Projects Summary:</h2></ion-col>
+                                <ion-col size="6" class="card-column">
+                                    <summary-card [title]="'Total Projects'" [icon]="'albums'" [total]="totalCount"></summary-card>
+                                </ion-col>
+                                <ion-col size="6" class="card-column">
+                                    <summary-card [title]="'New Projects'" [icon]="'folder'" [total]="newCount"></summary-card>
+                                </ion-col>
+                            </ion-row>
+                            <ion-row class="summary-row">
+                                <ion-col class="card-column">
+                                    <summary-card [title]="'Completed Projects'" [icon]="'checkmark'" [total]="doneCount"></summary-card>
+                                </ion-col>
+                                <ion-col class="card-column">
+                                    <summary-card [title]="'Ongoing Projects'" [icon]="'folder-open'" [total]="ipCount"></summary-card>
+                                </ion-col>
+                            </ion-row>
+                            <ion-row class="card-projects">
+                                <ion-col size="12">
+                                    <h3>Projects:</h3>
+                                    <ion-card [routerLink]="['../../manage/projects']" skipLocationChange [state]="{'id':membership.project_id,'project':membership}" *ngFor="let membership of memberships" class="clickable">
+                                        <div style="margin: max(1vw,1em)">
+                                            <div>
+                                                <div style="display: flex;flex-direction:row;justify-content:space-between">
+                                                    <h4 id="name">{{membership.project_name}}</h4>
+                                                    <p id="target_date"><b>Target Date: </b>{{membership.project_target|date:'mediumDate'}}</p>
+                                                </div>
+                                                <p id="subheader"><b>Managed by: </b>{{membership.project_owner_first}} {{membership.project_owner_last}}</p>
+                                            </div>
+                                            <div>
+                                                <div class="progress" style="display: flex;flex-direction:row;justify-content:space-between">
+                                                    <p position="stacked">Progress:</p>
+                                                    <p>{{membership.project_tasks_done}} out of {{membership.project_tasks_total}}</p>
+                                                </div>
+                                                <ion-progress-bar [value]="membership.project_tasks_done / membership.project_tasks_total" type="determinate"></ion-progress-bar>
+                                            </div>
+                                        </div>
+                                    </ion-card>
+                                </ion-col>
+                            </ion-row>
+                        </ion-grid>
+                    </ion-col>
+                    <ion-col style="padding-left: 0.5em;padding-right: 0.5em;" size-lg="6" size-xl="4.25" size-md="6" size-sm="12" size-xs="12">
+                        <ion-grid class="cards-grid">
+                            <ion-row class="summary-row">
+                                <ion-col size="12"><h2 style="margin-bottom: 0;">Tasks Summary:</h2></ion-col>
+                                <ion-col class="card-column">
+                                    <summary-card [title]="'Assigned Tasks'" [icon]="'file-tray-full'" [total]="totalTasks"></summary-card>
+                                </ion-col>
+                                <ion-col class="card-column">
+                                    <summary-card [title]="'New Tasks'" [icon]="'document'" [total]="newTasks"></summary-card>
+                                </ion-col>
+                            </ion-row>
+                            <ion-row class="summary-row">
+                                <ion-col class="card-column">
+                                    <summary-card [title]="'Completed Tasks'" [icon]="'checkmark'" [total]="doneTasks"></summary-card>
+                                </ion-col>
+                                <ion-col class="card-column">
+                                    <summary-card [title]="'Started Tasks'" [icon]="'document-text'" [total]="ipTasks"></summary-card>
+                                </ion-col>
+                            </ion-row>
+                            <ion-row class="card-projects">
+                                <ion-col size="12">
+                                    <h3>Tasks:</h3>
+                                    <ion-card (click)="openTask(task,drawer)" *ngFor="let task of tasksNotDone" class="clickable">
+                                        <div [class]="task.task_status" style="margin: 1em 1em">
+                                            <div style="display: flex;flex-direction:row;justify-content:space-between">
+                                                <h4>{{task['task_name']}}</h4>
+                                                <div style="display: flex;flex-direction:row;">
+                                                    <b style="margin-right: 0.3em">Status: </b>
+                                                    <p id="status"> {{task.task_status}}</p>
+                                                </div>
+                                            </div>
+                                            <p><b>For: </b>{{task.project_name}}</p>
+                                        </div>
+                                    </ion-card>
+                                </ion-col>
+                            </ion-row>
+                        </ion-grid>
+                    </ion-col>
+                    <ion-col size-lg="6" size-md="6" size-sm="6" size-xs="12" size-xl="3.5" style="padding-left: 3vw;padding-right: 3vw;margin-top: 1em;">
+                        <h3>Events:</h3>
+                        <ion-card (click)="openEvent(event,drawer)" *ngFor="let event of events" class="clickable" style="margin-left: auto;
+                        margin-right: auto;">
+                            <div id="event_container">
+                                <div style="display: flex;flex-direction:row; justify-content:space-between">
+                                    <h3 id="event_name">{{event.event_name}}</h3>
+                                    <p id="event_owner">By: {{event.event_owner_name}}</p>
+                                </div>
+                                <div style="display: flex;flex-direction:row; justify-content:space-between">
+                                    <div id="project_name">
+                                        <h4><b>For: </b>{{event.project_name}}</h4>
+                                    </div>
+                                    <div id="dates" style="text-align: end">
+                                        <p id="start">Start: {{event.event_date | dateNew:null}}</p>
+                                        <p>End: {{event.event_date | dateNew:event.event_end}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </ion-card>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
+        </mat-drawer-content>
+    </mat-drawer-container>
+</div>
+<div *ngIf="!loaded">
+    <ion-grid class="dashboard-container">
+        <ion-row class="parent-grid">
+            <ion-col style="padding-left: 0.5em;padding-right: 0.5em;" sizeLg="4.5" sizeXl="4.25" sizeMd="6" sizeSm="6" sizeXs="12">
+                <ion-grid class="cards-grid">
+                    <ion-row>
+                        <ion-col size="12">
+                            <h2 style="height: max(1.4vw,20px);">Projects Summary:</h2>
+                        </ion-col>
+                        <ion-col size="6" class="card-column" style="height: max(14vh,115px);">
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: 100%;"></ion-skeleton-text>
+                        </ion-col>
+                        <ion-col size="6" class="card-column" style="height: max(14vh,115px);">
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: 100%;"></ion-skeleton-text>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row>
+                        <ion-col size="6" class="card-column" style="height: max(14vh,115px);">
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: 100%;"></ion-skeleton-text>
+                        </ion-col>
+                        <ion-col size="6" class="card-column" style="height: max(14vh,115px);">
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: 100%;"></ion-skeleton-text>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row class="card-projects">
+                        <ion-col size="12">
+                            <h3>Projects</h3>
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: max(16vh,150px);"></ion-skeleton-text>
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: max(16vh,150px);margin-top: 1em;"></ion-skeleton-text>
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: max(16vh,150px);margin-top: 1em;"></ion-skeleton-text>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+            </ion-col>
+            <ion-col style="padding-left: 0.5em;padding-right: 0.5em;" sizeLg="4.5" sizeXl="4.25" sizeMd="6" sizeSm="6" sizeXs="12">
+                <ion-grid class="cards-grid">
+                    <ion-row>
+                        <ion-col size="12">
+                            <h2 style="height: max(1.4vw,20px);">Tasks Summary:</h2>
+                        </ion-col>
+                        <ion-col size="6" class="card-column" style="height: max(14vh,115px);">
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: 100%;"></ion-skeleton-text>
+                        </ion-col>
+                        <ion-col size="6" class="card-column" style="height: max(14vh,115px);">
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: 100%;"></ion-skeleton-text>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row>
+                        <ion-col size="6" class="card-column" style="height: max(14vh,115px);">
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: 100%;"></ion-skeleton-text>
+                        </ion-col>
+                        <ion-col size="6" class="card-column" style="height: max(14vh,115px);">
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: 100%;"></ion-skeleton-text>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row class="card-projects">
+                        <ion-col size="12">
+                            <h3>Tasks</h3>
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);"></ion-skeleton-text>
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+            </ion-col>
+            <ion-col size-lg="6" size-md="6" size-sm="6" size-xs="12" size-xl="3.5">
+                <h3 style="margin-left: 3vw;margin-right: 3vw;">Events:</h3>
+                <ion-skeleton-text [animated]="true" style="width: 70%;height: max(8vh,80px);margin-top: 1em;margin-left: auto;margin-right: auto;"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 70%;height: max(8vh,80px);margin-top: 1em;margin-left: auto;margin-right: auto;"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 70%;height: max(8vh,80px);margin-top: 1em;margin-left: auto;margin-right: auto;"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 70%;height: max(8vh,80px);margin-top: 1em;margin-left: auto;margin-right: auto;"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 70%;height: max(8vh,80px);margin-top: 1em;margin-left: auto;margin-right: auto;"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 70%;height: max(8vh,80px);margin-top: 1em;margin-left: auto;margin-right: auto;"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 70%;height: max(8vh,80px);margin-top: 1em;margin-left: auto;margin-right: auto;"></ion-skeleton-text>
+                <ion-skeleton-text [animated]="true" style="width: 70%;height: max(8vh,80px);margin-top: 1em;margin-left: auto;margin-right: auto;"></ion-skeleton-text>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+</div>

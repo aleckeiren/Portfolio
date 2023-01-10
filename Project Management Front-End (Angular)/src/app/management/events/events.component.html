@@ -1,0 +1,123 @@
+<div *ngIf="loaded" class="container">
+    <mat-drawer-container (backdropClick)="setNoSelected()" [hasBackdrop]="true" style="min-height: 100vh;background: none;">
+        <mat-drawer #drawer mode="over" position="end" style="width: 40%;" (keydown.escape)="setNoSelected()" (closed)="ngOnInit()">
+            <div *ngIf="isSelected">
+                <event-info [event]="selectedEvent" [projectId]="selectedEvent['project_id']" [account_id]="account_id" [drawer]="drawer"></event-info>
+            </div>
+        </mat-drawer>
+        <mat-drawer-content style="overflow-y: hidden;background: none;">
+            <ion-grid class="dashboard-container" style="width: 100%;padding: max(2vh,16px) max(5vw,10px);">
+                <ion-row class="parent-grid">
+                    <ion-col style="padding-left: 0.5em;padding-right: 0.5em;" size-lg="4" size-xl="4" size-md="6" size-sm="12" size-xs="12">
+                        <h2>Upcoming Events</h2>
+                        <ion-card (click)="openEvent(event,drawer)" *ngFor="let event of events_upcoming" class="clickable" style="margin-left: auto;
+                        margin-right: auto;">
+                            <div id="event_container">
+                                <div style="display: flex;flex-direction:row; justify-content:space-between">
+                                    <h3 id="event_upcoming">{{event.event_name}}</h3>
+                                    <p id="event_owner">By: {{event.event_owner_name}}</p>
+                                </div>
+                                <div style="display: flex;flex-direction:row; justify-content:space-between">
+                                    <div id="project_name">
+                                        <h4><b>For </b>{{event.project_name}}</h4>
+                                    </div>
+                                    <div id="dates" style="text-align: end">
+                                        <p id="start">Start: {{event.event_date | dateNew:null}}</p>
+                                        <p>End: {{event.event_date | dateNew:event.event_end}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </ion-card>
+                    </ion-col>
+                    <ion-col style="padding-left: 0.5em;padding-right: 0.5em;" size-lg="4" size-xl="4" size-md="6" size-sm="12" size-xs="12">
+                        <h2>Ongoing Events:</h2>
+                        <ion-card (click)="openEvent(event,drawer)" *ngFor="let event of events_ongoing" class="clickable" style="margin-left: auto;
+                        margin-right: auto;">
+                            <div id="event_container">
+                                <div style="display: flex;flex-direction:row; justify-content:space-between">
+                                    <h3 id="event_ongoing">{{event.event_name}}</h3>
+                                    <p id="event_owner">By: {{event.event_owner_name}}</p>
+                                </div>
+                                <div style="display: flex;flex-direction:row; justify-content:space-between">
+                                    <div id="project_name">
+                                        <h4><b>For: </b>{{event.project_name}}</h4>
+                                    </div>
+                                    <div id="dates" style="text-align: end">
+                                        <p id="start">Start: {{event.event_date | dateNew:null}}</p>
+                                        <p>End: {{event.event_date | dateNew:event.event_end}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </ion-card>
+                    </ion-col>
+                    <ion-col size-lg="4" size-md="6" size-sm="6" size-xs="12" size-xl="4">
+                        <h2>Past Events:</h2>
+                        <ion-card (click)="openEvent(event,drawer)" *ngFor="let event of events_done" class="clickable" style="margin-left: auto;
+                        margin-right: auto;">
+                            <div id="event_container">
+                                <div style="display: flex;flex-direction:row; justify-content:space-between">
+                                    <h3 id="event_done">{{event.event_name}}</h3>
+                                    <p id="event_owner">By: {{event.event_owner_name}}</p>
+                                </div>
+                                <div style="display: flex;flex-direction:row; justify-content:space-between">
+                                    <div id="project_name">
+                                        <h4><b>For: </b>{{event.project_name}}</h4>
+                                    </div>
+                                    <div id="dates" style="text-align: end">
+                                        <p id="start">Start: {{event.event_date | dateNew:null}}</p>
+                                        <p>End: {{event.event_date | dateNew:event.event_end}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </ion-card>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
+        </mat-drawer-content>
+    </mat-drawer-container>
+</div>
+<div *ngIf="!loaded">
+    <ion-grid class="dashboard-container" style="width: 100%;padding: max(2vh,16px) max(5vw,10px);">
+        <ion-row class="parent-grid">
+            <ion-col sizeLg="4" sizeXl="4" sizeMd="6" sizeSm="6" sizeXs="12">
+                <ion-grid class="cards-grid">
+                    <ion-row class="card-projects">
+                        <ion-col size="12">
+                            <h2>Upcoming Events:</h2>
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);"></ion-skeleton-text>
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+            </ion-col>
+            <ion-col sizeLg="4" sizeXl="4" sizeMd="6" sizeSm="6" sizeXs="12">
+                <ion-grid class="cards-grid">
+                    <ion-row class="card-projects">
+                        <ion-col size="12">
+                            <h2>Ongoing Events:</h2>
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);"></ion-skeleton-text>
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+            </ion-col>
+            <ion-col sizeLg="4" sizeXl="4" sizeMd="6" sizeSm="6" sizeXs="12">
+                <ion-grid class="cards-grid">
+                    <ion-row class="card-projects">
+                        <ion-col size="12">
+                            <h2>Past Events:</h2>
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);"></ion-skeleton-text>
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                            <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+</div>

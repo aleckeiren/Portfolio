@@ -1,0 +1,565 @@
+
+<mat-drawer-container (backdropClick)="setNoSelected()" [hasBackdrop]="true" style="min-height: 100vh;">
+    <mat-drawer #drawer mode="over" position="end" [style]="'width:'+drawerWidth" (keydown.escape)="setNoSelected()" (closed)="setNoSelected()">
+        <div style="width: 100%;height: 5vh;"><ion-icon class="drawer_close_icon" name="exit" (click)="drawer.close()"></ion-icon></div>
+        <div *ngIf="showForm else template" style="flex: 1 1 auto">
+            <div *ngIf="showTaskForm else showOtherForm"  style="padding-left: 2vw;padding-right:2vw">
+                <h3>New Task</h3>
+                <ion-item lines="full">
+                    <ion-label position="stacked">Task Name: </ion-label>
+                    <ion-input [(ngModel)]="taskForm.task_name">
+                    </ion-input>
+                </ion-item>
+                <ion-item>
+                    <ion-label position="stacked">Task Status: </ion-label>
+                    <ion-select
+                        [(ngModel)]="taskForm.task_status"
+                        interface="popover"
+                        >
+                        <ion-select-option value="New">New</ion-select-option>
+                        <ion-select-option value="In Progress">In Progress</ion-select-option>
+                        <ion-select-option value="Done">Done</ion-select-option>
+                    </ion-select>
+                </ion-item>
+                <ion-item>
+                    <ion-label position="stacked">Assigned To: </ion-label>
+                    <ion-select
+                        [(ngModel)]="taskForm.assigned_to"
+                        interface="popover"
+                        >
+                        <ion-select-option [value]="you[0].account_id">You</ion-select-option>
+                        <ion-select-option *ngFor="let member of membersFormList" [value]="member.account_id">{{member.first_name}} {{member.last_name}}</ion-select-option>
+                        <ion-select-option [value]="null"></ion-select-option>
+                    </ion-select>
+                </ion-item>
+                <ion-item>
+                    <ion-label position="stacked">Parent Task: </ion-label>
+                    <ion-select
+                        [(ngModel)]="taskForm.parent_task"
+                        interface="popover"
+                        >
+                        <ion-select-option *ngFor="let task of selectedProject.project_tasks" [value]="task.task_id">{{task.task_name}}</ion-select-option>
+                        <ion-select-option [value]="null"></ion-select-option>
+                    </ion-select>
+                </ion-item>
+                <ion-item>
+                    <ion-label position="stacked">Target Completion</ion-label>
+                    <ion-input
+                        value="{{taskForm.task_target | date}}"
+                        id="date3"
+                        name="task_creation"
+                    ></ion-input>
+                    <ion-popover trigger="date3" size="auto">
+                        <ng-template>
+                        <ion-datetime
+                            presentation="date-time"
+                            [(ngModel)]="taskForm.task_target"
+                            locale="default"
+                            name="picker2"
+                            [preferWheel]="false"
+                        ></ion-datetime>
+                        </ng-template>
+                    </ion-popover>
+                </ion-item>
+                <ion-item>
+                    <ion-label position="stacked">Task Description: </ion-label>
+                    <ion-textarea [(ngModel)]="taskForm.task_description" rows="3"></ion-textarea>
+                </ion-item>
+                <ion-button (click)="submitNewTask(drawer)" color="success">Create Task</ion-button>
+            </div>
+            <ng-template #showOtherForm style="height: 100%">
+                <div *ngIf="showEventForm else showMembers" style="padding-left: 2vw;padding-right:2vw">
+                    <h3>New Event</h3>
+                    <ion-item lines="full">
+                        <ion-label position="stacked">Event Name: </ion-label>
+                        <ion-input [(ngModel)]="eventForm.event_name">
+                        </ion-input>
+                    </ion-item>
+                    <ion-item lines="full">
+                        <ion-label position="stacked">Event Start:</ion-label>
+                        <ion-input
+                            value="{{eventForm.event_date| date:'MMM dd, YYYY | hh:mm a'}}"
+                            id="event_date"
+                            name="event_date"
+                        ></ion-input>
+                        <ion-popover trigger="event_date" size="auto">
+                            <ng-template>
+                            <ion-datetime
+                                presentation="date-time"
+                                [(ngModel)]="eventForm.event_date"
+                                locale="default"
+                                name="event_date"
+                                show-default-buttons="true"
+                                [preferWheel]="false"
+                            ></ion-datetime>
+                            </ng-template>
+                        </ion-popover>
+                    </ion-item>
+                    <ion-item lines="full">
+                        <ion-label position="stacked">Event End:</ion-label>
+                        <ion-input
+                            value="{{eventForm.event_end | date:'MMM dd, YYYY | hh:mm a'}}"
+                            id="event_end"
+                            name="event_end"
+                        ></ion-input>
+                        <ion-popover trigger="event_end" size="auto">
+                            <ng-template>
+                            <ion-datetime
+                                presentation="date-time"
+                                [(ngModel)]="eventForm.event_end"
+                                [min]="eventForm.event_date"
+                                locale="default"
+                                name="event_end"
+                                show-default-buttons="true"
+                                [preferWheel]="false"
+                            ></ion-datetime>
+                            </ng-template>
+                        </ion-popover>
+                    </ion-item>
+                    <ion-item>
+                        <ion-label position="stacked">Event Description: </ion-label>
+                        <ion-textarea [(ngModel)]="eventForm.event_description" rows="3"></ion-textarea>
+                    </ion-item>
+                    <ion-button (click)="submitNewEvent(drawer)" color="success">Create Event</ion-button>
+                </div>
+                <ng-template #showMembers style="height: 100%">
+                    <div *ngIf="addMember else membersList"  style="height: 100%">
+                        <form [formGroup]="FormData" (ngSubmit)="submitNewMember(drawer)">
+                            <ion-item>
+                                <ion-label position="stacked">Email: </ion-label>
+                                <ion-input type="email" required="true" formControlName="email"></ion-input>
+                            </ion-item>
+                            <ion-item lines="none">
+                                <ion-label position="stacked">Add and Delete Tasks: </ion-label>
+                                <ion-select
+                                    formControlName="add_del_task"
+                                    interface="popover"
+                                    >
+                                    <ion-select-option [value]="true">Allowed</ion-select-option>
+                                    <ion-select-option [value]="false">Not Allowed</ion-select-option>
+                                </ion-select>
+                            </ion-item>
+                            <ion-item lines="none">
+                                <ion-label position="stacked">Add and Delete Events: </ion-label>
+                                <ion-select
+                                    formControlName="add_del_event"
+                                    interface="popover"
+                                    >
+                                    <ion-select-option [value]="true">Allowed</ion-select-option>
+                                    <ion-select-option [value]="false">Not Allowed</ion-select-option>
+                                </ion-select>
+                            </ion-item>
+                            <ion-item lines="none">
+                                <ion-label position="stacked">Edit Project: </ion-label>
+                                <ion-select
+                                    formControlName="edit_project"
+                                    interface="popover"
+                                    >
+                                    <ion-select-option [value]="true">Allowed</ion-select-option>
+                                    <ion-select-option [value]="false">Not Allowed</ion-select-option>
+                                </ion-select>
+                            </ion-item>
+                            <ion-item lines="none">
+                                <ion-label position="stacked">Add and Delete Members: </ion-label>
+                                <ion-select
+                                    formControlName="add_del_member"
+                                    interface="popover"
+                                    >
+                                    <ion-select-option [value]="true">Allowed</ion-select-option>
+                                    <ion-select-option [value]="false">Not Allowed</ion-select-option>
+                                </ion-select>
+                            </ion-item>
+                            <ion-button type="submit" [disabled]="!FormData.valid" color="success">Submit</ion-button>
+                        </form>
+                    </div>
+                    <ng-template #membersList style="height: 100%">
+                        <div  style="height: 100%">
+                            <ion-grid style="overflow: auto;">
+                                <ion-row>
+                                    <ion-col size="12">
+                                        <h4 *ngIf="isOwner"><b>Project Owner: </b>You</h4>
+                                        <h4 *ngIf="!isOwner"><b>Project Owner: </b>{{this.owner[0].first_name}} {{this.owner[0].last_name}}</h4>
+                                    </ion-col>
+                                    <ion-col>
+                                        <h3>Project Members: </h3>
+                                    </ion-col>
+                                    <ion-col>
+                                        <h3>Permissions:</h3>
+                                    </ion-col>
+                                </ion-row>
+                                <ion-row>
+                                    <ion-col size="4.5">
+                                    </ion-col>
+                                    <ion-col size="7.5">
+                                        <ion-grid>
+                                            <ion-row>
+                                                <ion-col class="perms_col" size="3">
+                                                    <p>Tasks CRUD</p>
+                                                </ion-col>
+                                                <ion-col class="perms_col" size="3">
+                                                    <p>Events CRUD</p>
+                                                </ion-col>
+                                                <ion-col class="perms_col" size="3">
+                                                    <p>Members CRUD</p>
+                                                </ion-col>
+                                                <ion-col class="perms_col" size="3">
+                                                    <p>Edit Project</p>
+                                                </ion-col>
+                                            </ion-row>
+                                        </ion-grid>
+                                    </ion-col>
+                                </ion-row>
+                                <div style="height: 35vh;overflow: scroll;">
+                                    <ion-row *ngFor="let member of membersFormList">
+                                        <ion-col size="4.5" *ngIf="member.account_id != selectedProject.project_owner">
+                                            <ion-card style="padding: 0.5em 1em;">
+                                                <div>
+                                                    <p>{{member.first_name}} {{member.last_name}}</p>
+                                                </div>
+                                                <div style="display: flex;flex-direction:row; justify-content:space-between;">
+                                                    <p style="max-width: 80%">{{member.email}}</p>
+                                                    <ion-icon style="max-width: 20%" *ngIf="you[0].add_del_member" style="cursor: pointer" color="danger" name="trash" (click)="openMemConfirmation($event,membershipConfirmation)"></ion-icon>
+                                                    <ion-popover #membershipConfirmation [isOpen]="isMemOpen" size="auto"  (didDismiss)="isMemOpen = false">
+                                                        <ng-template>
+                                                            <ion-content class="ion-padding" style="text-align: right">
+                                                                <h3 style="color:red;font-weight:bold;">Are you sure?</h3>
+                                                                <h4>This will permanently delete the member from the project.</h4>
+                                                                <ion-button color="danger" (click)="dismissMemConfirmation(membershipConfirmation)">No</ion-button>
+                                                                <ion-button color="success" (click)="deleteMembership(member,membershipConfirmation);">Yes</ion-button>
+                                                            </ion-content>
+                                                        </ng-template>
+                                                    </ion-popover>
+                                                </div>
+                                            </ion-card>
+                                        </ion-col>
+                                        <ion-col style="display: flex;" size="7.5" *ngIf="member.account_id != selectedProject.project_owner">
+                                            <ion-grid style="align-self: center">
+                                                <ion-row *ngIf="member.account_id == you[0].account_id">
+                                                    <ion-col class="check_col" size="3">
+                                                        <mat-checkbox disabled="true" [(ngModel)]="member.add_del_task" (change)="updatePermissions(member)"></mat-checkbox>
+                                                    </ion-col>
+                                                    <ion-col class="check_col" size="3">
+                                                        <mat-checkbox disabled="true" [(ngModel)]="member.add_del_event" (change)="updatePermissions(member)"></mat-checkbox>
+                                                    </ion-col>
+                                                    <ion-col class="check_col" size="3">
+                                                        <mat-checkbox disabled="true" [(ngModel)]="member.add_del_member" (change)="updatePermissions(member)"></mat-checkbox>
+                                                    </ion-col>
+                                                    <ion-col class="check_col" size="3">
+                                                        <mat-checkbox disabled="true" [(ngModel)]="member.edit_project" (change)="updatePermissions(member)"></mat-checkbox>
+                                                    </ion-col>
+                                                </ion-row>
+                                                <ion-row *ngIf="member.account_id != you[0].account_id">
+                                                    <ion-col class="check_col" size="3">
+                                                        <mat-checkbox [(ngModel)]="member.add_del_task" (change)="updatePermissions(member)"></mat-checkbox>
+                                                    </ion-col>
+                                                    <ion-col class="check_col" size="3">
+                                                        <mat-checkbox [(ngModel)]="member.add_del_event" (change)="updatePermissions(member)"></mat-checkbox>
+                                                    </ion-col>
+                                                    <ion-col class="check_col" size="3">
+                                                        <mat-checkbox [(ngModel)]="member.add_del_member" (change)="updatePermissions(member)"></mat-checkbox>
+                                                    </ion-col>
+                                                    <ion-col class="check_col" size="3">
+                                                        <mat-checkbox [(ngModel)]="member.edit_project" (change)="updatePermissions(member)"></mat-checkbox>
+                                                    </ion-col>
+                                                </ion-row>
+                                            </ion-grid>
+                                        </ion-col>
+                                    </ion-row>
+                                </div>
+                                <ion-row style="border-top: 1px gray solid">
+                                    <ion-col size="12"  style="padding-left: 2vw;padding-right:2vw">
+                                        <h3>Add Member</h3>
+                                    </ion-col>
+                                    <ion-col>
+                                        <ion-grid>
+                                            <form [formGroup]="FormData" (ngSubmit)="submitNewMember(drawer)" style="padding-left: 2vw;padding-right:2vw"> 
+                                                <ion-row>
+                                                    <ion-col size="12">
+                                                        <ion-item>
+                                                            <ion-label position="stacked">Email: </ion-label>
+                                                            <ion-input type="email" required="true" formControlName="email"></ion-input>
+                                                        </ion-item>
+                                                    </ion-col>
+                                                    <ion-col size="6">
+                                                        <ion-item lines="none">
+                                                            <ion-label position="stacked">Tasks CRUD: </ion-label>
+                                                            <ion-select
+                                                                formControlName="add_del_task"
+                                                                interface="popover"
+                                                                >
+                                                                <ion-select-option [value]="true">Allowed</ion-select-option>
+                                                                <ion-select-option [value]="false">Not Allowed</ion-select-option>
+                                                            </ion-select>
+                                                        </ion-item>
+                                                    </ion-col>
+                                                    <ion-col size="6">
+                                                        <ion-item lines="none">
+                                                            <ion-label position="stacked">Events CRUD: </ion-label>
+                                                            <ion-select
+                                                                formControlName="add_del_event"
+                                                                interface="popover"
+                                                                >
+                                                                <ion-select-option [value]="true">Allowed</ion-select-option>
+                                                                <ion-select-option [value]="false">Not Allowed</ion-select-option>
+                                                            </ion-select>
+                                                        </ion-item>
+                                                    </ion-col>
+                                                    <ion-col size="6">
+                                                        <ion-item lines="none">
+                                                            <ion-label position="stacked">Edit Project: </ion-label>
+                                                            <ion-select
+                                                                formControlName="edit_project"
+                                                                interface="popover"
+                                                                >
+                                                                <ion-select-option [value]="true">Allowed</ion-select-option>
+                                                                <ion-select-option [value]="false">Not Allowed</ion-select-option>
+                                                            </ion-select>
+                                                        </ion-item>
+                                                    </ion-col>
+                                                    <ion-col  size="6">
+                                                        <ion-item lines="none">
+                                                            <ion-label position="stacked">Members CRUD: </ion-label>
+                                                            <ion-select
+                                                                formControlName="add_del_member"
+                                                                interface="popover"
+                                                                >
+                                                                <ion-select-option [value]="true">Allowed</ion-select-option>
+                                                                <ion-select-option [value]="false">Not Allowed</ion-select-option>
+                                                            </ion-select>
+                                                        </ion-item>
+                                                    </ion-col>
+                                                    <ion-col size="6">
+                                                        <ion-button type="submit" [disabled]="!FormData.valid" color="success">Add Member</ion-button>
+                                                    </ion-col>
+                                                </ion-row>
+                                            </form>
+                                        </ion-grid>
+                                    </ion-col>
+                                </ion-row>
+                            </ion-grid>
+                        </div>
+                    </ng-template>
+                </ng-template>
+            </ng-template>
+        </div>
+        <ng-template #template>
+            <div *ngIf="taskSelected else showEvent">
+                <task-info [task]="selectedTask" [account_id]="account_id" [drawer]="drawer" [allTasks]="selectedProject.project_tasks"></task-info>
+            </div>
+            <ng-template #showEvent class="header">
+                <div *ngIf="eventSelected" style="height: 100%">
+                    <event-info [event]="selectedEvent" [projectId]="selectedProject.project_id" [account_id]="account_id" [drawer]="drawer"></event-info>
+                </div>
+            </ng-template>
+        </ng-template>
+    </mat-drawer>
+    <mat-drawer-content style="display: flex; flex-direction: column;">
+        <div class="project_header" style="flex: 0 1 auto;height: max(25vh,232.4px);">
+            <ion-grid>
+                <ion-row class="project_info" style="padding-top: max(3vh,25px);">
+                    <ion-col>
+                        <h2 class="info_header">Project: </h2>
+                        <ion-input [(ngModel)]="selectedProject.project_name" class="info_text" (focusout)="saveProject(selectedProject)" [disabled]="!allowProjectEdit"></ion-input>
+                    </ion-col>
+                    <ion-col style="text-align: center">
+                        <h2 class="info_header">Start Date: </h2>
+                        <ion-input
+                        value="{{selectedProject.project_start | date}}"
+                        id="date_project_start"
+                        name="project_start"
+                        class="info_text"
+                        [disabled]="!allowProjectEdit"
+                        ></ion-input>
+                        <ion-popover #popover trigger="date_project_start" style="--min-width:max-content" size="auto" alignment="center">
+                            <ng-template>
+                                <ion-datetime
+                                    #projectStart
+                                    presentation="date_project_start"
+                                    (ionChange)="selectedProject.project_start = projectStart.value"
+                                    locale="default"
+                                    name="date_project_start_picker"
+                                    [preferWheel]="false"
+                                    (focusout)="saveProject(selectedProject)"
+                                    [disabled]="!allowProjectEdit"
+                                    
+                                ><ion-buttons slot="buttons" style="display: flex;flex-direction:row;justify-content:space-between;width: 320px;">
+                                    <div>
+                                        <ion-button color="primary" (click)="projectStart.cancel();popover.dismiss()">Close</ion-button>
+                                    </div>
+                                    <div>
+                                        <ion-button color="primary" (click)="projectStart.cancel();popover.dismiss()">Cancel</ion-button>
+                                        <ion-button color="primary" (click)=" projectStart.confirm(); saveProject(selectedProject);">Confirm</ion-button>
+                                    </div>
+                                    </ion-buttons>
+                                </ion-datetime>
+                            </ng-template>
+                        </ion-popover>
+                    </ion-col>
+                    <ion-col style="text-align: right">
+                        <h2 class="info_header">Target Date: </h2>
+                        <ion-input
+                        value="{{selectedProject.project_target | date}}"
+                        id="date_project_target"
+                        name="project_target"
+                        class="info_text"
+                        [disabled]="!allowProjectEdit"
+                        ></ion-input>
+                        <ion-popover trigger="date_project_target" size="auto" #popover2 style="--min-width:max-content" alignment="end">
+                            <ng-template>
+                            <ion-datetime
+                                [disabled]="!allowProjectEdit"
+                                presentation="date_project_target"
+                                #projectTarget
+                                locale="default"
+                                name="date_project_target_picker"
+                                show-default-buttons="true"
+                                [preferWheel]="false"
+                                (ionChange)="selectedProject.project_target = projectTarget.value"
+                            >
+                                <ion-buttons slot="buttons" style="display: flex;flex-direction:row;justify-content:space-between;width: 320px;">
+                                    <div>
+                                        <ion-button color="primary" (click)="projectTarget.cancel();popover2.dismiss()">Close</ion-button>
+                                    </div>
+                                    <div>
+                                        <ion-button color="primary" (click)="projectTarget.cancel();popover2.dismiss()">Cancel</ion-button>
+                                        <ion-button color="primary" (click)=" projectTarget.confirm(); saveProject(selectedProject);">Confirm</ion-button>
+                                    </div>
+                                </ion-buttons>
+                            </ion-datetime>
+                            </ng-template>
+                        </ion-popover>
+                    </ion-col>
+                </ion-row>
+                <ion-row class="project_info">
+                    <ion-col size="4"><h2 class="info_header">Created By: </h2><p class="info_text">{{selectedProject.project_owner_first}} {{selectedProject.project_owner_last}}</p></ion-col>
+                    <ion-col size="4" style="text-align: center">
+                        <h2 class="info_header">Status: </h2>
+                        <ion-select [disabled]="!allowProjectEdit" (ionChange)="saveProject(selectedProject)" class="info_text" style="font-size: 1.3em;width: min-content;margin: auto;" [(ngModel)]="selectedProject.project_status" interface="popover">
+                            <ion-select-option value="New">New</ion-select-option>
+                            <ion-select-option value="In Progress">In Progress</ion-select-option>
+                            <ion-select-option value="Done">Done</ion-select-option>
+                        </ion-select>
+                    </ion-col>
+                    <ion-col size="4" style="text-align: right">
+                        <h2 class="info_header">Progress: </h2>
+                        <p class="info_text">{{this.tasksDone.length}} out of {{this.selectedProject.project_tasks.length}} tasks</p>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
+        </div>
+        <div style="overflow-y: auto;height: max(75vh,998.4px);flex: 1 1 auto;">
+            <ion-grid>
+                <ion-row style="margin-right: 2vw;height: max(3.2vh,30px);">
+                    <ion-col size="12" style="display: flex;flex-direction: row;justify-content: end;">
+                        <a id="edit_link" *ngIf="isOwner" style="margin-right: max(0.5vw,5px);" (click)="downloadAsPDF(selectedProject.project_tasks)">Generate Report</a>
+                        <a id="edit_link" *ngIf="you[0].add_del_task" style="margin-right: max(0.5vw,5px);" (click)="openForm(drawer,'task')">Add Task</a>
+                        <a id="edit_link" *ngIf="you[0].add_del_event" style="margin-right: max(0.5vw,5px);" (click)="openForm(drawer,'event')">Add Event</a>
+                        <a id="edit_link" *ngIf="you[0].add_del_member" (click)="openMembers(drawer)" style="margin-right: max(0.5vw,5px);">Show Members</a>
+                        <a #delete id="delete_link" (click)="openConfirmation($event)" *ngIf="isOwner" style="color:red !important">Delete Project</a>
+                        <ion-popover [reference]="" #confirmation [isOpen]="isOpen" triggerAction="click" size="auto"  (didDismiss)="isOpen = false">
+                            <ng-template>
+                                <ion-content class="ion-padding">
+                                    <h3 style="color:red;font-weight:bold;">Are you sure?</h3>
+                                    <h4>Deleting the project will delete anything associated with it.</h4>
+                                    <ion-button color="danger" (click)="dismissConfirmation()">No</ion-button>
+                                    <ion-button color="success" (click)="deleteProject(selectedProject.project_id); confirmation.dismiss()">Yes</ion-button>
+                                </ion-content>
+                            </ng-template>
+                        </ion-popover>
+                    </ion-col>
+                </ion-row>
+                <ion-row class="parent_info" style="height: max(71.8vh,948.4px);">
+                    <ion-col class="info_container" size="12" size-sm="6" size-md="6" size-lg="3" size-xl="3" style="overflow: auto;height: max(65vh,620px);">
+                        <h2 style="position: sticky;top: 0;z-index: 3;background: #ffffff54;">New:</h2>
+                        <ion-card id="task_container" *ngFor="let task of tasksNew" (click)="openTask(task,drawer)" class="clickable">
+                            <div style="display: flex;flex-direction:row;justify-content:space-between">
+                                <h4 id="new_name" style="width: 50%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"><b>Task: </b>{{task.task_name}}</h4>
+                                <p *ngIf="task.assigned_to == null" style="align-self: baseline;width: 50%;text-align: right;">Not Assigned</p>
+                                <p *ngIf="task.assigned_to != null" style="align-self: baseline;width: 50%;text-align: right;"><b>Assigned To: </b>{{this.task.assigned_info}}</p>
+                            </div>
+                            <h4><b>Task Description: </b></h4>
+                            <div id="task_description" style="text-overflow: ellipsis;">
+                                {{task.task_description}}
+                            </div>
+                        </ion-card>
+                    </ion-col>
+                    <ion-col class="info_container" size="12" size-sm="6" size-md="6" size-lg="3" size-xl="3" style="overflow: auto;height: max(65vh,620px);">
+                        <h2 style="position: sticky;top: 0;z-index: 3;background: #ffffff54;">In Progress:</h2>
+                        <ion-card id="task_container" *ngFor="let task of tasksIP" (click)="openTask(task,drawer)" class="clickable">
+                            <div style="display: flex;flex-direction:row;justify-content:space-between">
+                                <h4 id="ip_name" style="width: 50%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"><b>Task: </b>{{task.task_name}}</h4>
+                                <p *ngIf="task.assigned_to == null" style="align-self: baseline;width: 50%;text-align: right;">Not Assigned</p>
+                                <p *ngIf="task.assigned_to != null" style="align-self: baseline;width: 50%;text-align: right;"><b>Assigned To: </b>{{this.task.assigned_info}}</p>
+                            </div>
+                            <h4><b>Task Description: </b></h4>
+                            <div id="task_description" style="text-overflow: ellipsis;">
+                                {{task.task_description}}
+                            </div>
+                        </ion-card>
+                    </ion-col>
+                    <ion-col class="info_container" size="12" size-sm="6" size-md="6" size-lg="3" size-xl="3" style="overflow: auto;height: max(65vh,620px);">
+                        <h2 style="position: sticky;top: 0;z-index: 3;background: #ffffff54;">Done:</h2>
+                        <ion-card id="task_container" *ngFor="let task of tasksDone" (click)="openTask(task,drawer)" class="clickable">
+                            <div style="display: flex;flex-direction:row;justify-content:space-between">
+                                <h4 id="done_name" style="width: 50%;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"><b>Task: </b>{{task.task_name}}</h4>
+                                <p *ngIf="task.assigned_to == null" style="align-self: baseline;width: 50%;text-align: right;">Not Assigned</p>
+                                <p *ngIf="task.assigned_to != null" style="align-self: baseline;width: 50%;text-align: right;"><b>Assigned To: </b>{{this.task.assigned_info}}</p>
+                            </div>
+                            <h4><b>Task Description: </b></h4>
+                            <div id="task_description" style="text-overflow: ellipsis;">
+                                {{task.task_description}}
+                            </div>
+                        </ion-card>
+                    </ion-col >
+                    <ion-col class="info_container" size="12" size-sm="6" size-md="6" size-lg="3" size-xl="3" style="overflow: auto;height: max(65vh,620px);">
+                        <div style="height: 50%;overflow: auto;">
+                            <h2 style="position: sticky;top: 0;z-index: 3;background: #ffffff54;">Ongoing & Upcoming Events:</h2>
+                            <ion-card *ngFor="let event of events" (click)="openEvent(event,drawer)" class="clickable">
+                                <div id="event_container">
+                                    <div style="display: flex;flex-direction:row; justify-content:space-between">
+                                        <h3 id="event_ongoing">{{event.event_name}}</h3>
+                                        <p id="event_owner">By: {{event.event_owner_name}}</p>
+                                    </div>
+                                    <div style="display: flex;flex-direction:row; justify-content:space-between">
+                                        <div id="dates" style="text-align: left">
+                                            <p id="start">Start: {{event.event_date | dateNew:null}}</p>
+                                            <p>End: {{event.event_date | dateNew:event.event_end}}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ion-card>
+                        </div>
+                        <div style="height: 50%;overflow: auto;">
+                            <h2 style="position: sticky;top: 0;z-index: 3;background: #ffffff54;">Project Files:</h2>
+                            <div style="display: flex;flex-direction:row;justify-content:space-between">
+                                <ion-input style="--padding-bottom: 0 !important;" #fileInput type="file" (change)="changeListener($event)"></ion-input>
+                                <ion-button [disabled]="!showUpload" (click)="uploadFile(fileInput)">Upload File</ion-button>
+                            </div>
+                            <ion-list>
+                                <ion-item *ngFor="let file of projectFiles">
+                                    <div style="display: flex;flex-direction:row;justify-content:space-between;width: 100%;">
+                                        <h3 style="margin-bottom: 0">{{file.file_name}}</h3>
+                                        <div>
+                                            <ion-icon name="trash" *ngIf="selectedProject.project_owner== you[0].account_id || file.file_uploader == you[0].account_id" #delete id="delete_icon" (click)="openFileConfirmation($event,fileconfirmation)"></ion-icon>
+                                            <a id="download_link" (click)="downloadFile(file.file_data,file.file_type,file.file_name)">Download</a>
+                                            <ion-popover #fileconfirmation [isOpen]="isFileOpen" size="auto"  (didDismiss)="isFileOpen = false">
+                                                <ng-template>
+                                                    <ion-content class="ion-padding">
+                                                        <h3 style="color:red;font-weight:bold;">Are you sure?</h3>
+                                                        <h4>Deleting the file will permanently remove it from the database.</h4>
+                                                        <ion-button color="danger" (click)="dismissFileConfirmation(fileconfirmation)">No</ion-button>
+                                                        <ion-button color="success" (click)="deleteFile(file.file_id,fileconfirmation)">Yes</ion-button>
+                                                    </ion-content>
+                                                </ng-template>
+                                            </ion-popover>
+                                        </div>
+                                    </div>
+                                </ion-item>
+                            </ion-list>
+                        </div>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
+        </div>
+    </mat-drawer-content>
+</mat-drawer-container>

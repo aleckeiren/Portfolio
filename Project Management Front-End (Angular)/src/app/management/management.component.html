@@ -1,0 +1,107 @@
+<ion-app>
+  <div *ngIf="showLoading" style="position: absolute;height: 100vh;width: 100vw;background: #f2f2f285;z-index: 999;display: flex;flex-direction: row;justify-content: center;align-content: end;">
+    <mat-spinner style="width: 100px; height: 100px;align-self: center;"></mat-spinner>
+  </div>
+  <div *ngIf="!loggedIn" style="height: 100%;display: flex;justify-content: center;align-items: center;background-color: #002a4f;">
+    <div *ngIf="showRegister" style="width: max-content;">
+        <ion-grid style="width: max-content;">
+          <ion-row>
+            <ion-card style="padding: max(1vw,1em);text-align: center;">
+              <img class="gawa-logo" src="assets/images/gawa-logo2.png">
+              <form [formGroup]="formData" (ngSubmit)="registerAccount()">
+                <ion-col size="6">
+                  <ion-item>
+                    <ion-label position="stacked">First Name</ion-label>
+                    <ion-input formControlName="first_name" type="text"></ion-input>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="6">
+                  <ion-item>
+                    <ion-label position="stacked">Last Name</ion-label>
+                    <ion-input formControlName="last_name" type="text"></ion-input>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="12">
+                  <ion-item>
+                    <ion-label position="stacked">Email</ion-label>
+                    <ion-input formControlName="email" type="email"></ion-input>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="12">
+                  <ion-item>
+                    <ion-label position="stacked">Password</ion-label>
+                    <ion-input formControlName="password" type="password"></ion-input>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="12" style="display: flex;flex-direction: row;justify-content: space-between;">
+                  <a id="form_link" (click)="showLoginForm()" style="align-self: center">Log In</a>
+                  <ion-button type="submit" [disabled]="!formData.valid" color="success">Register</ion-button>
+                </ion-col>
+              </form>
+            </ion-card>
+          </ion-row>
+        </ion-grid>
+      
+    </div>
+    <div *ngIf="!showRegister" style="width: max-content;">
+        <ion-grid style="width: max-content;">
+          <ion-row>
+            <ion-card style="padding: max(1vw,1em);text-align: center;">
+              <img class="gawa-logo" src="assets/images/gawa-logo2.png">
+              <form [formGroup]="loginData" (ngSubmit)="logIn(nav)">
+                <ion-col size="12">
+                  <ion-item>
+                    <ion-label position="stacked">Email</ion-label>
+                    <ion-input formControlName="email" type="text"></ion-input>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="12">
+                  <ion-item>
+                    <ion-label position="stacked">Password</ion-label>
+                    <ion-input formControlName="password" type="password"></ion-input>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="12" style="display: flex;flex-direction: row;justify-content: space-between;">
+                  <a id="form_link" (click)="showRegisterForm()" style="align-self: center">Register</a>
+                  <ion-button type="submit" [disabled]="!loginData.valid" color="success">Log In</ion-button>
+                </ion-col>
+              </form>
+            </ion-card>
+          </ion-row>
+        </ion-grid>
+      
+    </div>
+  </div>
+  <div [hidden]="!loggedIn" class="container" [class.is-mobile]="hidden">
+    <mat-toolbar [hidden]="hidden" style="background-color: #002a4f" class="toolbar">
+      <button mat-icon-button (click)="nav.toggle()" style="color: white" class="nav-button"><mat-icon>menu</mat-icon></button>
+    </mat-toolbar>
+    <mat-sidenav-container class="sidenav-container" style="background-color: rgba(62, 62, 62, 0.14)">
+      <mat-sidenav [disableClose]="true" #nav [mode]="sideMode">
+        <ion-card class="parent-welcome">
+          <div class="welcome-card">
+            <ion-icon class="img_profile" *ngIf="this.account.photo == null" (click)="openFile(input)" name="person-circle">
+              <input #input type="file" style="display:none" (change)="changeListener($event)">
+            </ion-icon>
+            <div style="height: max(60px,3.4vw);width:max(60px,3.4vw);margin-left:auto;margin-right: auto;margin-bottom: 1em;" class="image_container" *ngIf="this.account.photo != null"(click)="openFile(input)" >
+              <img class="img_profile" [src]="profilePicture" *ngIf="this.account.photo != null" name="person-circle">
+              <input #input type="file" accept="image/png, image/gif, image/jpeg" style="display:none" (change)="changeListener($event)">
+            </div>
+            <p>Hello, {{first_name}}!</p>
+            <a id="logout" (click)="logOut()">Log Out</a>
+          </div>
+        </ion-card>
+        <mat-nav-list>
+          <a routerLinkActive="active-link" routerLink="dashboard" class="nav-link" style="padding: 10px;" skipLocationChange><ion-icon style="font-size: calc(16px + 0.5vw);" name="grid"></ion-icon><p style="font-size: calc(16px + 0.5vw);">Dashboard</p></a>
+          <a routerLinkActive="active-link" [routerLink]="['projects']" [state]="{'id':'all'}" class="nav-link" style="padding: 10px;" skipLocationChange><ion-icon style="font-size: calc(16px + 0.5vw);" name="briefcase"></ion-icon><p style="font-size: calc(16px + 0.5vw);">Projects</p></a>
+          <a routerLinkActive="active-link" routerLink="history" class="nav-link" style="padding: 10px;" skipLocationChange><ion-icon style="font-size: calc(16px + 0.5vw);" name="archive"></ion-icon><p style="font-size: calc(16px + 0.5vw);">History</p></a>
+          <a routerLinkActive="active-link" routerLink="events" class="nav-link" style="padding: 10px;" skipLocationChange><ion-icon style="font-size: calc(16px + 0.5vw);" name="calendar"></ion-icon><p style="font-size: calc(16px + 0.5vw);">Events</p></a>
+        </mat-nav-list>
+      </mat-sidenav>
+  
+      <mat-sidenav-content [style]="contentMargin">
+        <router-outlet></router-outlet>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
+  </div>
+</ion-app>

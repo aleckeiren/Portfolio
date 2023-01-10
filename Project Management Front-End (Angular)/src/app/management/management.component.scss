@@ -1,0 +1,147 @@
+@import url('https://fonts.googleapis.com/css?family=Assistant&display=swap');
+
+.container {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.nav-button {
+  transition: 0.1s;
+}
+
+.nav-button:hover{
+  -ms-transform: rotate(-90deg); /* IE 9 */
+  transform: rotate(-90deg);
+}
+
+.nav-button:active{
+  -ms-transform: rotate(-90deg); /* IE 9 */
+  transform: rotate(-90deg);
+}
+@media (max-width:992px){
+  mat-sidenav {
+      width: 25% !important;
+  }
+  ion-icon {
+    font-size: calc(16px + 2vw) !important;
+  }
+  p {
+    font-size: calc(16px + 1vw) !important;
+  }
+}
+@media (min-width:992px){
+  .welcome-card{
+    width: 9.85vw;
+  }
+}
+@media (max-width:768px){
+  mat-sidenav {
+      width: 45% !important;
+  }
+}
+.image_container{
+  height: max(60px, 3.4vw);
+  width: max(60px, 3.4vw);
+  overflow: hidden;
+  border-radius: 50%;
+  text-align: center;
+  position: relative;
+  img {
+    border: 0;
+    max-height: 100%;
+    object-fit: contain;
+    overflow: hidden;
+    transform: translateX(-50%) translateY(-50%);
+    top: 50%;
+    left: 50%;
+    position: absolute;
+  }
+}
+#logout {
+  margin-top: 1em;
+  margin-left: auto;
+  color: bisque;
+  width: max-content;
+  margin-right: auto;
+}
+#form_link:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+#logout:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+.parent-welcome {
+  background: #004684;
+  padding: 1vw;
+  height: max-content;
+  .welcome-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: white;
+    height: 100%;
+    ion-icon{
+      font-size: max(60px,3.4vw) !important;
+      align-self: center;
+    }
+    p {
+        margin-bottom: 0;
+        align-self: center;
+        font-size: 1.2vw;
+        font-weight:400;
+    }
+  }
+}
+.img_profile:hover {
+  cursor: pointer;
+}
+.gawa-logo {
+  width: max(5vw,100px);
+}
+mat-sidenav {
+  background-color: #002a4f;
+  font-family: 'Assistant', Helvetica, sans-serif;
+  mat-nav-list {
+    color: white;
+    .nav-link {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      width: inherit;
+      margin-left: 1vw;
+      border-top-left-radius: 25px;
+      border-bottom-left-radius: 25px;
+      padding: 0.5vw;
+      p {
+        margin:0;
+        align-self: center;
+        margin-left: 0.3em;
+      }
+      ion-icon {
+        margin-left: 0.5em;
+      }
+    }
+    .active-link {
+      color: #cfe2ff;
+      background: #004684;    
+    }
+  }
+}
+.is-mobile .toolbar {
+  position: fixed;
+  z-index: 2;
+}
+
+.sidenav-container {
+  flex: 1;
+}
+
+.is-mobile .sidenav-container {
+  flex: 1 0 auto;
+}

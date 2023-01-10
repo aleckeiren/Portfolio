@@ -1,0 +1,225 @@
+<div *ngIf="loaded" class="container">
+    <mat-drawer-container (backdropClick)="closeDrawer()" [hasBackdrop]="true" style="min-height: 100vh;">
+        <mat-drawer #drawer mode="over" position="end" style="width: 20%;" (keydown.escape)="closeDrawer()">
+            <form style="margin:max(1vw,16px)" [formGroup]="FormData" (ngSubmit)="submitNewProject(drawer)">
+                <h3>Create New Project: </h3>
+                <ion-item>
+                    <ion-label position="stacked">Project Name: </ion-label>
+                    <ion-input type="text" required="true" formControlName="project_name"></ion-input>
+                </ion-item>
+                <ion-item>
+                    <ion-label position="stacked">Target Completion</ion-label>
+                    <ion-input
+                        value="{{formDate}}"
+                        textContent="{{formDate|date}}"
+                        id="date2"
+                        name="task_creation"
+                        formControlName="project_target"
+                    ></ion-input>
+                    <ion-popover trigger="date2" size="cover">
+                        <ng-template>
+                        <ion-datetime
+                            presentation="date-time"
+                            [(ngModel)]="formDate"
+                            locale="default"
+                            name="picker2"
+                            show-default-buttons="true"
+                            [preferWheel]="false"
+                            [ngModelOptions]="{standalone:true}"
+                        ></ion-datetime>
+                        </ng-template>
+                    </ion-popover>
+                </ion-item>
+                <ion-item>
+                    <ion-label position="stacked">Project Description: </ion-label>
+                    <ion-input type="text" required="true" formControlName="project_description"></ion-input>
+                </ion-item>
+                <ion-button type="submit" [disabled]="!FormData.valid" color="success">Submit</ion-button>
+            </form>
+        </mat-drawer>
+        <mat-drawer-content>
+            <div class="header" *ngIf="show_project">
+                <p class="project_link" (click)="setNoSelected()" style="color: wheat;">Projects </p>
+                <p style="margin-left: max(0.2vw,4px);display: flex;color: darkgray;"> <ion-icon style="align-self: center" name="caret-forward"></ion-icon> {{selectedProject.project_name}}</p>
+            </div>
+            <div *ngIf="show_project; else elseBlock" class="project_area"><project-info [selectedProject]="selectedProject" [account_id]="account_id"></project-info></div>
+            <ng-template #elseBlock>
+                <div class="project_area">
+                    <ion-grid class="main-grid" style="width: 100%;padding: max(2vh,16px) max(5vw,10px);">
+                        <ion-row style="display: flex;flex-direction:row;justify-content:end"><ion-button id="add_link" (click)="openForm(drawer)" style="margin-right: max(0.5vw,5px);" color="success">Create Project</ion-button></ion-row>
+                        <ion-row style="height: 100%">
+                            <ion-col class="projects-col" size-xl="4" size-lg="4" size-md="6" size="12">
+                                <h2>New Projects: </h2>
+                                <ion-card (click)="setSelected(membership)" *ngFor="let membership of projectsNew" class="clickable">
+                                    <div style="margin: max(1vw,1em)">
+                                        <div>
+                                            <div style="display: flex;flex-direction:row;justify-content:space-between">
+                                                <h4 id="name_upcoming">{{membership.project_name}}</h4>
+                                                <p id="target_date"><b>Target Date: </b>{{membership.project_target|date:'mediumDate'}}</p>
+                                            </div>
+                                            <div style="display:flex;flex-direction:row;justify-content:space-between">
+                                                <p id="subheader"><b>Managed by: </b>{{membership.project_owner_first}} {{membership.project_owner_last}}</p>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="progress" style="display: flex;flex-direction:row;justify-content:space-between">
+                                                <p position="stacked">Progress:</p>
+                                                <p>{{membership.project_tasks_done}} out of {{membership.project_tasks_total}}</p>
+                                            </div>
+                                            <ion-progress-bar [value]="membership.project_tasks_done / membership.project_tasks_total" type="determinate"></ion-progress-bar>
+                                        </div>
+                                    </div>
+                                </ion-card>
+                            </ion-col>
+                            <ion-col class="projects-col" size-xl="4" size-lg="4" size-md="6" size="12">
+                                <h2>Ongoing Projects: </h2>
+                                <ion-card (click)="setSelected(membership)" *ngFor="let membership of projectsIP" class="clickable">
+                                    <div style="margin: max(1vw,1em)">
+                                        <div>
+                                            <div style="display: flex;flex-direction:row;justify-content:space-between">
+                                                <h4 id="name_ongoing">{{membership.project_name}}</h4>
+                                                <p id="target_date"><b>Target Date: </b>{{membership.project_target|date:'mediumDate'}}</p>
+                                            </div>
+                                            <div style="display:flex;flex-direction:row;justify-content:space-between">
+                                                <p id="subheader"><b>Managed by: </b>{{membership.project_owner_first}} {{membership.project_owner_last}}</p>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="progress" style="display: flex;flex-direction:row;justify-content:space-between">
+                                                <p position="stacked">Progress:</p>
+                                                <p>{{membership.project_tasks_done}} out of {{membership.project_tasks_total}}</p>
+                                            </div>
+                                            <ion-progress-bar [value]="membership.project_tasks_done / membership.project_tasks_total" type="determinate"></ion-progress-bar>
+                                        </div>
+                                    </div>
+                                </ion-card>
+                            </ion-col>
+                            <ion-col class="projects-col" size-xl="4" size-lg="4" size-md="6" size="12">
+                                <h2>Completed Projects: </h2>
+                                <ion-card (click)="setSelected(membership)" *ngFor="let membership of projectsDone" class="clickable">
+                                    <div style="margin: max(1vw,1em)">
+                                        <div>
+                                            <div style="display: flex;flex-direction:row;justify-content:space-between">
+                                                <h4 id="name_done">{{membership.project_name}}</h4>
+                                                <p id="target_date"><b>Target Date: </b>{{membership.project_target|date:'mediumDate'}}</p>
+                                            </div>
+                                            <div style="display:flex;flex-direction:row;justify-content:space-between">
+                                                <p id="subheader"><b>Managed by: </b>{{membership.project_owner_first}} {{membership.project_owner_last}}</p>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="progress" style="display: flex;flex-direction:row;justify-content:space-between">
+                                                <p position="stacked">Progress:</p>
+                                                <p>{{membership.project_tasks_done}} out of {{membership.project_tasks_total}}</p>
+                                            </div>
+                                            <ion-progress-bar [value]="membership.project_tasks_done / membership.project_tasks_total" type="determinate"></ion-progress-bar>
+                                        </div>
+                                    </div>
+                                </ion-card>
+                            </ion-col>
+                        </ion-row>
+                    </ion-grid>
+                </div>
+            </ng-template>
+        </mat-drawer-content>
+    </mat-drawer-container>
+</div>
+<div *ngIf="!loaded" class="container">
+    <div *ngIf="!loadProject" class="project_area">
+        <ion-grid style="width: 100%;padding: max(2vh,16px) max(5vw,10px);">
+            <ion-row>
+                <ion-col size-xl="4" size-lg="4" size-md="6" size="12">
+                    <h2>New Projects: </h2>
+                    <ion-skeleton-text [animated]="true" style="width: 100%;height: max(16vh,150px);"></ion-skeleton-text>
+                    <ion-skeleton-text [animated]="true" style="width: 100%;height: max(16vh,150px);margin-top: 1em;"></ion-skeleton-text>
+                    <ion-skeleton-text [animated]="true" style="width: 100%;height: max(16vh,150px);margin-top: 1em;"></ion-skeleton-text>
+                </ion-col>
+                <ion-col size-xl="4" size-lg="4" size-md="6" size="12">
+                    <h2>Ongoing Projects: </h2>
+                    <ion-skeleton-text [animated]="true" style="width: 100%;height: max(16vh,150px);"></ion-skeleton-text>
+                    <ion-skeleton-text [animated]="true" style="width: 100%;height: max(16vh,150px);margin-top: 1em;"></ion-skeleton-text>
+                    <ion-skeleton-text [animated]="true" style="width: 100%;height: max(16vh,150px);margin-top: 1em;"></ion-skeleton-text>
+                </ion-col>
+                <ion-col size-xl="4" size-lg="4" size-md="6" size="12">
+                    <h2>Completed Projects: </h2>
+                    <ion-skeleton-text [animated]="true" style="width: 100%;height: max(16vh,150px);"></ion-skeleton-text>
+                    <ion-skeleton-text [animated]="true" style="width: 100%;height: max(16vh,150px);margin-top: 1em;"></ion-skeleton-text>
+                    <ion-skeleton-text [animated]="true" style="width: 100%;height: max(16vh,150px);margin-top: 1em;"></ion-skeleton-text>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+    </div>
+    <div *ngIf="loadProject" class="project_area">
+        <div class="project_header" style="flex: 0 1 auto;background: lightslategray;color: #ececec;padding-left: 4vw;
+        padding-right: 4vw;">
+            <ion-grid>
+                <ion-row class="project_info" style="padding-top: max(3vh,25px);">
+                    <ion-col>
+                        <h2 class="info_header">Project: </h2>
+                        <ion-skeleton-text animated="true" style="height: max(4vh,38px);"></ion-skeleton-text>
+                    </ion-col>
+                    <ion-col style="text-align: center">
+                        <h2 class="info_header">Start Date: </h2>
+                        <ion-skeleton-text animated="true" style="height: max(4vh,38px);"></ion-skeleton-text>
+                    </ion-col>
+                    <ion-col style="text-align: right">
+                        <h2 class="info_header">Target Date: </h2>
+                        <ion-skeleton-text animated="true" style="height: max(4vh,38px);"></ion-skeleton-text>
+                    </ion-col>
+                </ion-row>
+                <ion-row class="project_info">
+                    <ion-col size="4"><h2 class="info_header">Created By: </h2>
+                        <ion-skeleton-text animated="true" style="height: max(4vh,38px);"></ion-skeleton-text>
+                    </ion-col>
+                    <ion-col size="4" style="text-align: center">
+                        <h2 class="info_header">Status: </h2>
+                        <ion-skeleton-text animated="true" style="height: max(4vh,38px);"></ion-skeleton-text>
+                    </ion-col>
+                    <ion-col size="4" style="text-align: right">
+                        <h2 class="info_header">Progress: </h2>
+                        <ion-skeleton-text animated="true" style="height: max(4vh,38px);"></ion-skeleton-text>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
+        </div>
+        <div style="flex: 1 1 auto;">
+            <ion-grid>
+                <ion-row style="margin-right:2vw">
+                    <ion-col size="12" style="display: flex;flex-direction: row;justify-content: end;">
+                    </ion-col>
+                </ion-row>
+                <ion-row class="parent_info" style="padding-left: 4vw;
+                padding-right: 4vw;">
+                    <ion-col class="info_container" size="12" size-sm="6" size-md="6" size-lg="3" size-xl="3" style="max-height: 100%;overflow: auto;">
+                        <h2>New:</h2>
+                        <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);"></ion-skeleton-text>
+                        <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                        <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                        <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                    </ion-col>
+                    <ion-col class="info_container" size="12" size-sm="6" size-md="6" size-lg="3" size-xl="3" style="max-height: 100%;overflow: auto;">
+                        <h2>In Progress:</h2>
+                        <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);"></ion-skeleton-text>
+                        <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                        <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                        <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                    </ion-col>
+                    <ion-col class="info_container" size="12" size-sm="6" size-md="6" size-lg="3" size-xl="3" style="max-height: 100%;overflow: auto;">
+                        <h2>Done:</h2>
+                        <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);"></ion-skeleton-text>
+                        <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                        <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                        <ion-skeleton-text [animated]="true" style="width: 100%;height: max(10vh,90px);margin-top: 1em;"></ion-skeleton-text>
+                    </ion-col >
+                    <ion-col class="info_container" size="12" size-sm="6" size-md="6" size-lg="3" size-xl="3" style="max-height: 100%;overflow: auto;">
+                        <h2>Upcoming Events:</h2>
+                        <ion-skeleton-text [animated]="true" style="width: 100%;height: max(8vh,80px);margin-top: 1em;"></ion-skeleton-text>
+                        <ion-skeleton-text [animated]="true" style="width: 100%;height: max(8vh,80px);margin-top: 1em;"></ion-skeleton-text>
+                        <ion-skeleton-text [animated]="true" style="width: 100%;height: max(8vh,80px);margin-top: 1em;"></ion-skeleton-text>
+                        <ion-skeleton-text [animated]="true" style="width: 100%;height: max(8vh,80px);margin-top: 1em;"></ion-skeleton-text>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
+        </div>
+    </div>
+</div>

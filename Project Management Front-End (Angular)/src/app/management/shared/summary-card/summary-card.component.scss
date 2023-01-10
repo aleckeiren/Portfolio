@@ -1,0 +1,91 @@
+
+#subheader {
+    float: right;
+}
+
+.container {
+    padding: max(0.5vw,8px) max(1vw,16px);
+    #header {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        font-size: max(1.3vw, 16px);
+        #icon-container {
+            padding-top: 0.5em;
+            padding-bottom: 0.5em;
+            font-size: max(1vw, 16px);
+            ion-icon {
+                border-radius: 50%;
+                font-size: 1.2em;
+                padding: max(0.5em,13px);
+            }
+        }
+        p {
+            align-self: center;
+            margin-bottom: 0;
+            font-weight: bold;
+        }
+    }
+}
+.albums,.file-tray-full {
+    background-color: rgba(0, 242, 255, 0.24);
+    color: lightseagreen;
+}
+
+#albums_container,#file-tray-full_container{
+    background: #defffd;
+}
+
+.folder,.document {
+    background-color: #ffff004d;
+    color: goldenrod;
+}
+
+#folder_container,#document_container {
+    background-color: #fff5da;
+}
+
+.checkmark {
+    background: #C1E1C1C4;
+    color: green;
+}
+
+#checkmark_container {
+    background-color: #e0ffe0;
+}
+
+.folder-open,.document-text {
+    background: #a5bdbd;
+    color: darkslategray;
+}
+
+#folder-open_container, #document-text_container {
+    background-color: #dde4ea;
+}
+
+#folder-open,#folder-open_subheader,#document-text,#document-text_subheader {
+    color: darkslategray;
+}
+#folder-open_subheader,#checkmark_subheader,#folder_subheader, #albums_subheader,#file-tray-full_subheader,#document_subheader,#document-text_subheader{
+    text-align: right;
+}
+
+#checkmark, #checkmark_subheader {
+    color: green;
+}
+
+#folder,#folder_subheader,#document,#document_subheader {
+    color: goldenrod;
+}
+
+#albums, #albums_subheader,#file-tray-full,#file-tray-full_subheader {
+    color: lightseagreen;
+}
+
+.create{
+    .icon-inner, .ionicon, svg {
+        margin-left: 0.09em;
+        margin-top: -0.074em;
+    }
+}

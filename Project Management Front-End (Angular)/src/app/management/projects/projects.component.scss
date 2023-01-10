@@ -1,0 +1,105 @@
+.header {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    flex: 0 1 auto;
+}
+
+.container {
+    height: 100%;
+    display: flex;
+    flex-flow: column;
+}
+
+.project_area {
+    flex: 1 1 auto;
+    display: flex;
+    flex-flow: column;
+}
+.main-grid {
+    overflow-y: auto;
+}
+
+project-info {
+    height: 100%;
+}
+
+.project_link:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+h3,h2 {
+    font-weight: 500;
+    color: gray !important;
+    font-size: max(1vw,23px);
+}
+#name_done, #name_upcoming,#name_ongoing{
+    font-size: max(1.1vw,18px);
+    margin-bottom: max(0.6vw, 14px);
+}
+#name_done {
+    color: green !important;
+}
+#name_ongoing {
+    color: darkcyan !important;
+}
+
+#name_upcoming {
+    color: darkgoldenrod !important
+}
+#target_date {
+    align-self: center;
+}
+#subheader,#target_date {
+    font-size: max(0.9vw,16px);
+    margin-bottom: max(0.5vw,13px) 
+}
+.progress {
+    font-size: max(0.7vw,14px);
+}
+ion-progress-bar {
+    height: max(0.3vw,6px);
+}
+.clickable{
+    transition: 0.2s;
+    margin-bottom: 1em;
+}
+#delete:hover {
+    cursor: pointer;
+}
+.clickable:hover{
+    cursor: pointer;
+    -webkit-box-shadow: 0px 0px 15px 6px rgba(0,0,0,0.4); 
+    box-shadow: 0px 0px 15px 6px rgba(0,0,0,0.4);
+}
+.projects-col {
+    height: 100%;
+}
+ion-input,ion-textarea {
+    font-size: max(0.7vw, 20px);
+}
+ion-label {
+    font-size: max(0.4vw,18px);
+}
+.header {
+    padding-left: max(4.6vw,31px);
+    padding-right: 4vw;
+    position: absolute;
+    z-index: 2;
+    margin-top: max(1vh,10px);
+}
+@media (max-width:991px){
+    mat-drawer {
+        width: 70% !important;
+    }
+}
+@media (max-width:549px){
+    mat-drawer {
+        width: 100% !important;
+    }
+    
+    .projects-col {
+        max-height: 40vh;
+        overflow-y: auto;
+    }
+}

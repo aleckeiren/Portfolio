@@ -1,0 +1,137 @@
+<div *ngIf="loaded">
+    <ion-grid class="task-info-container">
+        <ion-row>
+            <ion-col size-xl="4" size-lg="4">
+                <ion-item>
+                    <ion-label position="stacked">Task:</ion-label>
+                    <ion-input autofocus="false" tabindex="2" [(ngModel)]="task.task_name" type="text" name="task_name" (ionBlur)="updateTask()" [disabled]="!allowTaskEdit"></ion-input>
+                </ion-item>
+            </ion-col>
+            <ion-col size-xl="4" size-lg="4">
+                <ion-item lines="none">
+                    <ion-label position="stacked">Created On:</ion-label>
+                    <ion-input
+                        disabled="true"
+                        value="{{task.task_creation | date}}"
+                        readonly="true"
+                    ></ion-input>
+                </ion-item>
+            </ion-col>
+            <ion-col size-xl="4" size-lg="4">
+                <ion-item lines="none">
+                    <ion-label position="stacked">Created By:</ion-label>
+                    <ion-input [value]="task.owner_info" [readonly]="true"></ion-input>
+                </ion-item>
+            </ion-col>
+            <ion-col size-xl="4" size-lg="4">
+                <ion-item>
+                    <ion-label position="stacked">Assigned To:</ion-label>
+                    <ion-select
+                        #select
+                        [(ngModel)]="task.assigned_to"
+                        interface="popover"
+                        (ionChange)="updateTask()"
+                        >
+                        <ion-select-option [value]="you[0].account_id">You</ion-select-option>
+                        <ion-select-option *ngFor="let member of membersFormList" [value]="member.account_id">{{member.first_name}} {{member.last_name}}</ion-select-option>
+                        <ion-select-option [value]="null"></ion-select-option>
+                    </ion-select>
+                </ion-item>
+            </ion-col>
+            <ion-col size-xl="4" size-lg="4">
+                <ion-item class="target_item" lines="full">
+                    <ion-label position="stacked">Target Date:</ion-label>
+                    <ion-input
+                        value="{{task.task_target | date}}"
+                        id="task_target"
+                        name="task_target"
+                        [disabled]="!allowTaskEdit"
+                    ></ion-input>
+                    <ion-popover trigger="task_target" size="cover">
+                        <ng-template>
+                        <ion-datetime
+                            #taskTarget
+                            presentation="date-time"
+                            locale="default"
+                            name="task_target"
+                            [preferWheel]="false"
+                            (ionChange)="task.task_target = taskTarget.value;updateTask()"
+                            [disabled]="!allowTaskEdit"
+                        ></ion-datetime>
+                        </ng-template>
+                    </ion-popover>
+                </ion-item>
+            </ion-col>
+            <ion-col size-xl="4" size-lg="4">
+                <ion-item>
+                    <ion-label position="stacked">Status:</ion-label>
+                    <ion-select
+                        #select
+                        [(ngModel)]="task.task_status"
+                        interface="popover"
+                        (ionChange)="updateTask()"
+                        >
+                        <ion-select-option value="New">New</ion-select-option>
+                        <ion-select-option value="In Progress">In Progress</ion-select-option>
+                        <ion-select-option value="Done">Done</ion-select-option>
+                    </ion-select>
+                </ion-item>
+            </ion-col>
+            <ion-col size="4">
+                <ion-item>
+                    <ion-label position="stacked">Parent Task: </ion-label>
+                    <ion-select
+                        [(ngModel)]="task.parent_task"
+                        interface="popover"
+                        (ionChange)="updateTask()"
+                        >
+                        <ion-select-option *ngFor="let parent of allTasks" [value]="parent.task_id">{{parent.task_name}}</ion-select-option>
+                        <ion-select-option [value]="null"></ion-select-option>
+                    </ion-select>
+                </ion-item>
+            </ion-col>
+            <ion-col size="12">
+                <ion-item>
+                    <ion-label position="stacked">Description:</ion-label>
+                    <ion-textarea autoGrow="true" [(ngModel)]="task.task_description" (ionBlur)="updateTask()" [disabled]="!allowTaskEdit"></ion-textarea>
+                </ion-item>
+            </ion-col>
+            <ion-col size="12" *ngIf="allowTaskEdit">
+                <ion-button style="float: right" #delete id="delete_link"  (click)="openConfirmation($event)"  color="danger">Delete</ion-button>
+                <ion-popover #taskconfirmation [isOpen]="isOpen" triggerAction="click" size="auto"  (didDismiss)="isOpen = false">
+                    <ng-template>
+                        <ion-content class="ion-padding" style="text-align: right">
+                            <h3 style="color:red;font-weight:bold;">Are you sure?</h3>
+                            <h4>This will permanently delete the task.</h4>
+                            <ion-button color="danger" (click)="dismissConfirmation()">No</ion-button>
+                            <ion-button color="success" (click)="deleteTask(task.task_id); confirmation.dismiss()">Yes</ion-button>
+                        </ion-content>
+                    </ng-template>
+                </ion-popover>
+            </ion-col>
+            <ion-col class="comment-container" size="12" style="min-height: 70vh;">
+                <div class="content-container">
+                    <ion-item>
+                        <ion-label position="stacked">Comment:</ion-label>
+                        <ion-textarea [autofocus]="true" tabindex="1" [(ngModel)]="comment.comment_content" rows="3" style="white-space: pre-line;">
+                        </ion-textarea>
+                    </ion-item>
+                    <div style="text-align: right">
+                        <ion-button (click)="postComment()" color="success">Post Comment</ion-button>
+                    </div>
+                </div>
+                <div class="comments">
+                    <h2>Comments:</h2>
+                    <ion-card *ngFor="let comment of comments">
+                        <ion-card-header>
+                            <ion-card-subtitle  style="display: flex;flex-direction:row;justify-content:space-between"><h3 style="width: 50%"><b>From:</b> {{comment.first_name}} {{comment.last_name}}</h3><h3 style="width: 50%;text-align: right;">Date Posted: {{comment.comment_date | date:'MMM d, y, h:mm a'}}</h3></ion-card-subtitle>
+                        </ion-card-header>
+                        <ion-card-content>
+                            <p>{{comment.comment_content}}</p>
+                        </ion-card-content>
+                    </ion-card>
+                </div>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+</div>

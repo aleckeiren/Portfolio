@@ -1,0 +1,9 @@
+<ion-card #container [id]="icon + '_container'">
+    <div class="container">
+        <div id="header">
+            <div id="icon-container"><ion-icon part="icon" [classList]="icon"  [name]="icon"></ion-icon></div>
+            <p [id]="icon">{{total}}</p>
+        </div>
+        <p [id]="icon +'_'+ 'subheader'">{{title}}</p>
+    </div>
+</ion-card>
